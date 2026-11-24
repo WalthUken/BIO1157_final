@@ -1,0 +1,1073 @@
+<!doctype html>
+<html lang="fr" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>BIO 1157, final</title>
+<meta name="description" content="Animations pour réviser l'examen final de BIO 1157.">
+<script>try{var m=localStorage.getItem('bio1157-final-theme');if(m)document.documentElement.dataset.theme=m}catch(e){}
+function Gate(c,s){let on=false,last=0;function f(n){if(!c()){on=false;return}const dt=Math.max(0,Math.min(.05,(n-last)/1000));last=n;s(dt);requestAnimationFrame(f)}return function(){if(on||!c())return;on=true;last=performance.now();requestAnimationFrame(f)}}
+/* Stepper : moteur commun des animations. Chaque étape est un objet de valeurs numériques ;
+   le passage d'une étape à l'autre interpole ces valeurs (requestAnimationFrame seulement
+   pendant la transition, aucune boucle permanente). Démarre en pause. */
+function Stepper(id,o){
+ const sec=document.getElementById(id),fig=sec.querySelector('.fig'),txt=sec.querySelector('.txt');
+ const RM=matchMedia('(prefers-reduced-motion: reduce)').matches;
+ const IC={prev:'<svg viewBox="0 0 24 24"><path d="M15 6l-6 6l6 6"/></svg>',next:'<svg viewBox="0 0 24 24"><path d="M9 6l6 6l-6 6"/></svg>',
+  play:'<svg viewBox="0 0 24 24"><path class="fl" d="M8 5l11 7l-11 7z"/></svg>',pause:'<svg viewBox="0 0 24 24"><path d="M9 5v14M15 5v14"/></svg>'};
+ const ctl=document.createElement('div');ctl.className='ctl';
+ ctl.innerHTML=`<button class="icon prev" aria-label="Étape précédente">${IC.prev}</button><span class="dots"></span><button class="icon next" aria-label="Étape suivante">${IC.next}</button><button class="icon play" aria-label="Lecture">${IC.play}</button><span class="cnt"></span>`;
+ fig.appendChild(ctl);
+ const dots=ctl.querySelector('.dots'),cnt=ctl.querySelector('.cnt'),pb=ctl.querySelector('.play');
+ const modes=o.modes||[{caps:o.caps,st:o.st}];
+ const lp=(a,b,u)=>a+(b-a)*u,ez=u=>u<.5?2*u*u:1-Math.pow(-2*u+2,2)/2,dur=k=>RM?1:(o.dur?o.dur(k,M):1200);
+ let M=0,s=0,cur={},from={},t0=0,anim=false,playing=false,tm=0,vis=true;
+ function frame(n){if(!t0)t0=n;const T=modes[M].st[s],u=ez(Math.min(1,(n-t0)/dur(s)));
+  for(const k in T)cur[k]=lp(k in from?from[k]:T[k],T[k],u);o.render(cur,M,s);
+  if(u<1)requestAnimationFrame(frame);else anim=false}
+ function go(k){const n=modes[M].caps.length;s=(k+n)%n;from={...cur};t0=0;
+  if(!anim){anim=true;requestAnimationFrame(frame)}
+  txt.textContent=modes[M].caps[s];cnt.textContent=(s+1)+' / '+n;
+  [...dots.children].forEach((d,i)=>d.classList.toggle('on',i===s))}
+ function setPlay(p){playing=p&&vis;clearTimeout(tm);pb.innerHTML=playing?IC.pause:IC.play;pb.setAttribute('aria-label',playing?'Pause':'Lecture');
+  if(playing){if(s===modes[M].caps.length-1)go(0);loop()}}
+ function loop(){tm=setTimeout(()=>{if(!playing)return;if(s>=modes[M].caps.length-1){setPlay(false);return}go(s+1);loop()},dur(s)+1700)}
+ function setMode(m){setPlay(false);M=m;if(o.build)o.build(m);dots.innerHTML='';
+  modes[m].caps.forEach((c,i)=>{const d=document.createElement('span');d.className='dot';d.title='Étape '+(i+1);d.onclick=()=>{setPlay(false);go(i)};dots.appendChild(d)});
+  sec.querySelectorAll('.md').forEach((b,i)=>b.classList.toggle('on',i===m));
+  s=0;cur={...modes[m].st[0]};from={...cur};o.render(cur,m,0);go(0)}
+ ctl.querySelector('.prev').onclick=()=>{setPlay(false);go(s-1)};
+ ctl.querySelector('.next').onclick=()=>{setPlay(false);go(s+1)};
+ pb.onclick=()=>setPlay(!playing);
+ sec.querySelectorAll('.md').forEach((b,i)=>b.onclick=()=>setMode(i));
+ sec.tabIndex=-1;sec.addEventListener('pointerdown',e=>{if(!e.target.closest('input,button'))sec.focus({preventScroll:true})});
+ sec.addEventListener('keydown',e=>{if(e.key==='ArrowRight'){e.preventDefault();ctl.querySelector('.next').click()}if(e.key==='ArrowLeft'){e.preventDefault();ctl.querySelector('.prev').click()}});
+ if('IntersectionObserver' in window)new IntersectionObserver(e=>{vis=e[0].isIntersecting;if(!vis&&playing)setPlay(false)}).observe(sec);
+ setMode(0);
+}
+</script>
+<style>
+:root{--page:#1a1a19;--card:#1f1f1e;--hover:#2a2a28;--text:#ecebe6;--s:#a6a49d;--muted:#7c7a74;--b:rgba(255,255,255,.12);--bs:rgba(255,255,255,.24);--acc-bg:#0C447C;--acc-tx:#B5D4F4;--acc-bd:#378ADD;--danger:#F09595;
+--coral-f:#712B13;--coral-s:#F0997B;--coral-t:#F5C4B3;--coral-u:#F0997B;
+--purple-f:#3C3489;--purple-s:#AFA9EC;--purple-t:#CECBF6;--purple-u:#AFA9EC;
+--gray-f:#444441;--gray-s:#B4B2A9;--gray-t:#D3D1C7;--gray-u:#B4B2A9;
+--amber-f:#633806;--amber-s:#EF9F27;--amber-t:#FAC775;--amber-u:#EF9F27;
+--teal-f:#085041;--teal-s:#5DCAA5;--teal-t:#9FE1CB;--teal-u:#5DCAA5;
+--red-f:#791F1F;--red-s:#F09595;--red-t:#F7C1C1;--red-u:#F09595;
+--blue-f:#0C447C;--blue-s:#85B7EB;--blue-t:#B5D4F4;--blue-u:#85B7EB}
+:root[data-theme="light"]{--page:#f5f4ef;--card:#ffffff;--hover:#f1efe8;--text:#1f1e1c;--s:#5f5e5a;--muted:#888780;--b:rgba(0,0,0,.12);--bs:rgba(0,0,0,.24);--acc-bg:#E6F1FB;--acc-tx:#0C447C;--acc-bd:#378ADD;--danger:#A32D2D;
+--coral-f:#FAECE7;--coral-s:#993C1D;--coral-t:#712B13;--coral-u:#993C1D;
+--purple-f:#EEEDFE;--purple-s:#534AB7;--purple-t:#3C3489;--purple-u:#534AB7;
+--gray-f:#F1EFE8;--gray-s:#5F5E5A;--gray-t:#444441;--gray-u:#5F5E5A;
+--amber-f:#FAEEDA;--amber-s:#854F0B;--amber-t:#633806;--amber-u:#854F0B;
+--teal-f:#E1F5EE;--teal-s:#0F6E56;--teal-t:#085041;--teal-u:#0F6E56;
+--red-f:#FCEBEB;--red-s:#A32D2D;--red-t:#791F1F;--red-u:#A32D2D;
+--blue-f:#E6F1FB;--blue-s:#185FA5;--blue-t:#0C447C;--blue-u:#185FA5}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+html,body{margin:0;background:var(--page);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",system-ui,sans-serif;-webkit-font-smoothing:antialiased}
+main{max-width:760px;margin:0 auto;padding:0 16px 64px}
+header{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;margin-bottom:20px}
+.kicker{font-size:13px;color:var(--muted);margin:0 0 4px}
+h1{font-size:24px;font-weight:500;margin:0}
+h2{font-size:18px;font-weight:500;margin:0}
+section,.catg{scroll-margin-top:76px}
+section+section{margin-top:56px}
+.src{font-size:13px;color:var(--muted);margin:4px 0 16px}
+button{font:inherit;font-size:14px;color:var(--text);background:transparent;border:.5px solid var(--bs);border-radius:8px;padding:8px 14px;cursor:pointer;transition:background .15s}
+button:hover{background:var(--hover)}
+button:active{transform:scale(.98)}
+.icon{display:inline-flex;align-items:center;justify-content:center;width:44px;height:36px;padding:0}
+.icon svg{width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.card{background:var(--card);border:.5px solid var(--b);border-radius:12px;padding:20px}
+.modes{display:flex;flex-wrap:wrap;gap:8px;margin:0 0 12px}
+.md.on{background:var(--acc-bg);color:var(--acc-tx);border-color:var(--acc-bd)}
+.ctl{display:flex;align-items:center;gap:8px;margin-top:12px}
+.dots{display:flex;gap:6px;margin-left:8px}
+.dot{width:8px;height:8px;border-radius:50%;background:var(--bs);cursor:pointer}
+.dot.on{background:var(--text)}
+.cnt{margin-left:auto;font-size:13px;color:var(--s)}
+.cap{margin-top:14px;min-height:130px}
+.ttl{font-size:16px;font-weight:500}
+.txt{font-size:15px;color:var(--s);line-height:1.6;margin-top:4px}
+.note{font-size:13px;color:var(--muted);line-height:1.5;margin-top:6px}
+svg text{font-family:inherit}
+.t{font-size:14px;fill:var(--text)}
+.ts{font-size:12px;fill:var(--s)}
+.th{font-size:14px;font-weight:500;fill:var(--text)}
+.arr{stroke:var(--muted);stroke-width:1.2;fill:none}
+.c-coral>rect{fill:var(--coral-f);stroke:var(--coral-s)}.c-coral>.t,.c-coral>.th{fill:var(--coral-t)}.c-coral>.ts{fill:var(--coral-u)}
+.c-purple>rect,rect.c-purple{fill:var(--purple-f);stroke:var(--purple-s)}.c-purple>.t,.c-purple>.th{fill:var(--purple-t)}.c-purple>.ts{fill:var(--purple-u)}
+.c-gray>rect{fill:var(--gray-f);stroke:var(--gray-s)}.c-gray>.t,.c-gray>.th{fill:var(--gray-t)}.c-gray>.ts{fill:var(--gray-u)}
+.c-amber>rect{fill:var(--amber-f);stroke:var(--amber-s)}.c-amber>.t,.c-amber>.th{fill:var(--amber-t)}.c-amber>.ts{fill:var(--amber-u)}
+.c-teal>rect{fill:var(--teal-f);stroke:var(--teal-s)}.c-teal>.t,.c-teal>.th{fill:var(--teal-t)}.c-teal>.ts{fill:var(--teal-u)}
+.c-red>rect{fill:var(--red-f);stroke:var(--red-s)}.c-red>.t,.c-red>.th{fill:var(--red-t)}.c-red>.ts{fill:var(--red-u)}
+.c-blue>rect{fill:var(--blue-f);stroke:var(--blue-s)}.c-blue>.t,.c-blue>.th{fill:var(--blue-t)}.c-blue>.ts{fill:var(--blue-u)}
+.hk{transition:opacity .4s}
+.dim{opacity:.25}
+.lvl{transform-box:fill-box;transform-origin:0 50%;transition:transform 1.4s ease}
+.flip{transition:transform .9s ease}
+.catg{font-size:13px;color:var(--muted);margin:0 0 24px;padding-bottom:8px;border-bottom:.5px solid var(--b)}
+section+.catg{margin-top:72px}
+footer{margin-top:48px;font-size:13px;color:var(--muted)}
+/* Menu façon boutique : un onglet par catégorie, panneau déroulant, recherche, tiroir sur mobile */
+.wrap{max-width:760px;margin:0 auto;padding:0 16px}
+.top{padding-top:40px}
+.mega{position:sticky;top:0;z-index:30;background:var(--page);border-bottom:.5px solid var(--b);margin-bottom:40px}
+.mg-row{display:flex;align-items:center;gap:4px;padding-top:10px;padding-bottom:10px}
+.mg-brand{font-size:14px;font-weight:600;letter-spacing:.02em;color:var(--text);text-decoration:none;white-space:nowrap;margin-right:14px}
+.mg-tabs{display:flex;align-items:center;gap:2px;list-style:none;margin:0;padding:0;flex:1;min-width:0}
+.mg-tab{position:relative;display:inline-flex;align-items:center;gap:6px;height:32px;border:0;padding:0 12px;font-size:14px;color:var(--s);white-space:nowrap}
+.mg-tab svg,.mg-acc>button>svg{width:12px;height:12px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;transition:transform .2s}
+.mg-tab:hover,.mg-tab[aria-expanded="true"]{background:var(--hover);color:var(--text)}
+.mg-tab[aria-expanded="true"] svg{transform:rotate(180deg)}
+.mg-tab:active{transform:none}
+.mg-tab.cur{color:var(--text)}
+.mg-tab.cur::after{content:"";position:absolute;left:12px;right:12px;bottom:-10px;height:2px;border-radius:2px;background:var(--acc-bd)}
+.mega .icon{flex:none;width:36px;height:32px;border-color:transparent}
+.mega .icon:hover{border-color:var(--b)}
+.mega .icon[aria-expanded="true"]{background:var(--hover)}
+.mg-burger,.mg-crumb{display:none}
+.mg-crumb{flex:1;min-width:0;align-items:center;gap:6px;border:0;padding:6px 8px;font-size:13px;text-align:left}
+.mg-crumb span{color:var(--muted);white-space:nowrap}
+.mg-crumb b{font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.mg-panels{position:absolute;left:0;right:0;top:100%}
+.mg-panel{background:var(--card);border-bottom:.5px solid var(--b);box-shadow:0 24px 48px -24px rgba(0,0,0,.5);max-height:calc(100vh - 72px);max-height:calc(100svh - 72px);overflow:auto;animation:mg-in .18s ease-out}
+.mg-panel[hidden]{display:none}
+.mg-panels.sw .mg-panel{animation:none}
+@keyframes mg-in{from{opacity:0;transform:translateY(-6px)}}
+.mg-in{display:grid;grid-template-columns:210px minmax(0,1fr);gap:28px;padding-top:24px;padding-bottom:28px}
+.mg-in1{grid-template-columns:minmax(0,1fr);gap:12px}
+.mg-kick{font-size:12px;color:var(--muted);margin:0 0 6px;text-transform:uppercase;letter-spacing:.06em}
+.mg-h{font-size:18px;font-weight:500;line-height:1.3;margin:0 0 6px}
+.mg-n{font-size:13px;color:var(--s);margin:0 0 14px}
+.mg-in1 .mg-n{margin:0}
+.mg-all{font-size:13px;color:var(--acc-tx);text-decoration:none;border-bottom:.5px solid var(--acc-bd)}
+.mg-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:10px;list-style:none;margin:0;padding:0}
+.mg-card{position:relative;display:flex;flex-direction:column;gap:4px;height:100%;color:inherit;text-decoration:none;border:.5px solid var(--b);border-radius:10px;padding:12px 14px 12px 17px;transition:background .15s,border-color .15s}
+.mg-card::before{content:"";position:absolute;left:0;top:12px;bottom:12px;width:3px;border-radius:0 3px 3px 0;background:var(--k)}
+.mg-card:hover{background:var(--hover);border-color:var(--bs)}
+.mg-card.on{background:var(--acc-bg);border-color:var(--acc-bd)}
+.mg-card.on .mg-t{color:var(--acc-tx)}
+.mg-c{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em}
+.mg-t{font-size:14px;font-weight:500;color:var(--text)}
+.mg-d{font-size:13px;color:var(--s);line-height:1.45}
+.mg-s{font-size:12px;color:var(--muted);margin-top:auto;padding-top:4px}
+.mg-here{display:none;font-size:11px;color:var(--acc-tx)}
+.mg-card.on .mg-here{display:block}
+.mg-card:focus-visible,.mg-tab:focus-visible,.mg-acc a:focus-visible{outline:2px solid var(--acc-bd);outline-offset:2px}
+.mg-q{display:flex;align-items:center;gap:10px;border:.5px solid var(--bs);border-radius:10px;padding:0 12px;background:var(--page)}
+.mg-q:focus-within{border-color:var(--acc-bd)}
+.mg-q svg{flex:none;width:16px;height:16px;stroke:var(--muted);fill:none;stroke-width:2;stroke-linecap:round}
+.mg-q input{flex:1;min-width:0;font:inherit;font-size:16px;color:var(--text);background:transparent;border:0;outline:0;padding:11px 0}
+.mg-q input::placeholder{color:var(--muted)}
+.mg-veil{position:fixed;inset:0;z-index:25;background:rgba(0,0,0,.42);opacity:0;pointer-events:none;transition:opacity .2s}
+.mg-veil.on{opacity:1;pointer-events:auto}
+.mg-veil.top{z-index:45}
+.mg-drawer{position:fixed;top:0;bottom:0;left:0;z-index:50;display:flex;flex-direction:column;width:min(88vw,380px);background:var(--page);border-right:.5px solid var(--b);transform:translateX(-102%);visibility:hidden;transition:transform .25s ease,visibility 0s .25s}
+.mg-drawer.open{transform:none;visibility:visible;transition:transform .25s ease}
+.mg-dh{display:flex;align-items:center;justify-content:space-between;padding:10px 16px;border-bottom:.5px solid var(--b)}
+.mg-dh p{font-size:16px;font-weight:500;margin:0}
+.mg-dh .icon{border-color:transparent}
+.mg-db{flex:1;overflow:auto;padding:14px 16px 32px}
+.mg-db .mg-grid{grid-template-columns:minmax(0,1fr);margin-top:10px}
+.mg-db .mg-n{margin:12px 0 0}
+.mg-acc{border-bottom:.5px solid var(--b)}
+.mg-acc>button{display:flex;align-items:center;gap:12px;width:100%;border:0;border-radius:0;padding:14px 2px;text-align:left}
+.mg-acc>button:hover{background:transparent}
+.mg-acc>button[aria-expanded="true"]>svg{transform:rotate(180deg)}
+.mg-dot{flex:none;width:8px;height:8px;border-radius:50%;background:var(--k)}
+.mg-at{flex:1;min-width:0}
+.mg-at b{display:block;font-size:15px;font-weight:500}
+.mg-at small{display:block;font-size:12px;color:var(--muted);margin-top:2px}
+.mg-acc ul{list-style:none;margin:0 0 12px;padding:0 0 0 20px}
+.mg-acc ul[hidden]{display:none}
+.mg-acc a{display:block;padding:9px 12px;border-radius:8px;font-size:15px;color:var(--s);text-decoration:none}
+.mg-acc a:hover{background:var(--hover);color:var(--text)}
+.mg-acc a.on{background:var(--acc-bg);color:var(--acc-tx)}
+.mg-acc a.mg-all{display:inline-block;padding:9px 0 4px;margin-left:12px;border-radius:0;font-size:13px;color:var(--acc-tx)}
+html.mg-lock{overflow:hidden}
+@media (max-width:719px){
+.mg-brand,.mg-tabs{display:none}
+.mg-burger,.mg-crumb{display:flex}
+.mg-panels{display:none}
+}
+@media (min-width:720px) and (max-width:860px){.mg-tab{padding:0 8px}.mg-brand{margin-right:6px}}
+@media (prefers-reduced-motion:reduce){.mg-panel{animation:none}.mg-drawer,.mg-drawer.open,.mg-veil{transition:none}}
+/* Grand écran : animation et commandes à gauche, texte à droite, la case tient dans la fenêtre */
+@media (min-width:980px){
+main{max-width:1180px}
+.wrap{max-width:1180px}
+.split{display:grid;grid-template-columns:minmax(0,1fr) var(--side,340px);column-gap:28px;align-items:start}
+.split>.fig{display:flex;flex-direction:column;max-height:calc(100vh - 183px);max-height:calc(100svh - 183px)}
+.split>.fig>*{flex-shrink:0}
+.split>.fig>svg{flex-shrink:1;min-height:0}
+.split>.side>.cap{margin-top:0}
+}
+
+:root{--green-f:#27500A;--green-s:#97C459;--green-t:#C0DD97;--green-u:#97C459;--pink-f:#72243E;--pink-s:#ED93B1;--pink-t:#F4C0D1;--pink-u:#ED93B1;
+--text-primary:var(--text);--text-secondary:var(--s);--text-muted:var(--muted);--text-danger:var(--danger);--text-success:#97C459;--border:var(--b);--border-strong:var(--bs);--border-stronger:rgba(255,255,255,.4);--bg-neutral:rgba(255,255,255,.06);--surface-0:var(--page);--t:var(--muted)}
+:root[data-theme="light"]{--green-f:#EAF3DE;--green-s:#3B6D11;--green-t:#27500A;--green-u:#3B6D11;--pink-f:#FBEAF0;--pink-s:#993556;--pink-t:#72243E;--pink-u:#993556;--text-success:#3B6D11;--border-stronger:rgba(0,0,0,.4);--bg-neutral:rgba(0,0,0,.05)}
+.c-coral>circle,circle.c-coral,rect.c-coral{fill:var(--coral-f);stroke:var(--coral-s)}
+.c-purple>circle,circle.c-purple{fill:var(--purple-f);stroke:var(--purple-s)}
+.c-gray>circle,circle.c-gray,rect.c-gray{fill:var(--gray-f);stroke:var(--gray-s)}
+.c-amber>circle,circle.c-amber,rect.c-amber{fill:var(--amber-f);stroke:var(--amber-s)}
+.c-teal>circle,circle.c-teal,rect.c-teal{fill:var(--teal-f);stroke:var(--teal-s)}
+.c-red>circle,circle.c-red,rect.c-red{fill:var(--red-f);stroke:var(--red-s)}
+.c-blue>circle,circle.c-blue,rect.c-blue{fill:var(--blue-f);stroke:var(--blue-s)}
+.c-green>rect,.c-green>circle,rect.c-green,circle.c-green{fill:var(--green-f);stroke:var(--green-s)}.c-green>.t,.c-green>.th{fill:var(--green-t)}.c-green>.ts{fill:var(--green-u)}
+.c-pink>rect,.c-pink>circle,rect.c-pink,circle.c-pink{fill:var(--pink-f);stroke:var(--pink-s)}.c-pink>.t,.c-pink>.th{fill:var(--pink-t)}.c-pink>.ts{fill:var(--pink-u)}
+.leader{stroke:var(--muted);stroke-width:.5;stroke-dasharray:3 3;fill:none}
+.ctl .play{margin-left:8px}
+.ctl .icon .fl{fill:currentColor;stroke:none}
+.lg{display:flex;flex-wrap:wrap;gap:6px 18px;font-size:12px;color:var(--s);margin:6px 0 0}
+.lg span{display:inline-flex;align-items:center;gap:6px}
+.lg i{display:inline-block;width:12px;height:12px;border-radius:50%;border:.5px solid}
+.lg i.sq{border-radius:3px}
+.lg i.ln{height:4px;width:16px;border-radius:2px;border:0}
+section:focus{outline:none}
+.kb{font-size:12px;color:var(--muted);margin-top:10px}
+</style>
+</head>
+<body>
+<div class="wrap top">
+<header>
+<div>
+<p class="kicker">BIO 1157, biologie cellulaire</p>
+<h1>Examen final</h1>
+</div>
+<button id="theme">Mode clair</button>
+</header>
+</div>
+<nav class="mega" aria-label="Animations">
+<div class="wrap mg-row">
+<button class="icon mg-burger" id="mg-burger" aria-label="Ouvrir le menu" aria-expanded="false" aria-controls="mg-drawer"><svg viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h16"/></svg></button>
+<a class="mg-brand" id="mg-brand" href="#">BIO 1157</a>
+<ul class="mg-tabs" id="mg-tabs"></ul>
+<button class="mg-crumb" id="mg-crumb" aria-label="Ouvrir le menu"><span id="mg-cc"></span><span>›</span><b id="mg-cs"></b></button>
+<button class="icon" id="mg-sb" aria-label="Rechercher une animation" aria-expanded="false" aria-controls="mg-p-search"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/></svg></button>
+<button class="icon" id="haut" aria-label="Haut de page"><svg viewBox="0 0 24 24"><path d="M6 15l6-6l6 6"/></svg></button>
+</div>
+<div class="mg-panels" id="mg-panels"></div>
+</nav>
+<div class="mg-veil" id="mg-veil"></div>
+<aside class="mg-drawer" id="mg-drawer" aria-label="Menu"></aside>
+<main>
+
+<p class="catg" id="cat-mito">Mitochondries et chloroplastes : le transport à travers deux membranes (cours 8)</p>
+
+<section id="signal">
+<h2>Le signal d'importation mitochondrial</h2>
+<p class="src">Cours 8, diapositive 5</p>
+<div class="card split">
+<div class="fig">
+<svg width="100%" viewBox="0 0 680 390" role="img">
+<title>Signal mitochondrial amphiphile</title>
+<desc>Séquence de 18 acides aminés en N-terminal, vue en roue hélicoïdale, puis reconnaissance de sa face hydrophobe par le récepteur de TOM.</desc>
+<g id="sg-chain"></g>
+<g id="sg-recep" opacity=".3">
+<rect x="0" y="322" width="680" height="26" fill="var(--bg-neutral)"/>
+<text class="ts" x="16" y="339">Membrane externe</text>
+<text class="ts" x="16" y="368">Espace intermembranaire</text>
+<path d="M650 112 L650 330 L520 330 L520 278 Q568 272 568 211 Q568 150 520 144 L520 112 Z" fill="var(--card)" stroke="var(--bs)" stroke-width="0.5"/>
+<path d="M520 278 Q568 272 568 211 Q568 150 520 144" fill="none" stroke="#EF9F27" stroke-width="4" stroke-linecap="round"/>
+<text class="th" x="610" y="200" text-anchor="middle">Récepteur</text>
+<text class="ts" x="610" y="220" text-anchor="middle">de TOM</text>
+<text class="ts" x="545" y="100" text-anchor="middle">Poche hydrophobe</text>
+</g>
+<g id="sg-faces" opacity="0">
+<text class="th" x="124" y="206" text-anchor="end">Face chargée +</text>
+<text class="ts" x="124" y="224" text-anchor="end">Arg, Lys</text>
+<text class="th" x="336" y="206">Face hydrophobe</text>
+<text class="ts" x="336" y="224">Leu, Ile, Phe</text>
+</g>
+<g id="sg-wheel" opacity="0"></g>
+<circle cx="200" cy="378" r="6" class="c-amber"/><text class="ts" x="212" y="382">Hydrophobe</text>
+<circle cx="310" cy="378" r="6" class="c-coral"/><text class="ts" x="322" y="382">Chargé (+)</text>
+<circle cx="415" cy="378" r="6" class="c-gray"/><text class="ts" x="427" y="382">Polaire</text>
+</svg>
+</div>
+<div class="side"><div class="cap"><div class="txt"></div>
+<p class="note">La roue place chaque résidu à 100° du précédent, comme dans une vraie hélice α : les Arg et Lys tombent toutes du même côté. Le nom TOM20-22 vient de la diapositive 10, la prof ne demande pas les numéros.</p></div></div>
+</div>
+</section>
+<script>
+(function(){
+const $=i=>document.getElementById('sg-'+i),NS='http://www.w3.org/2000/svg';
+const R=[["Met","c"],["Leu","h"],["Ser","p"],["Leu","h"],["Arg","c"],["Gln","p"],["Ser","p"],["Ile","h"],["Arg","c"],["Phe","h"],["Phe","h"],["Lys","c"],["Pro","h"],["Ala","h"],["Thr","p"],["Arg","c"],["Thr","p"],["Leu","h"]];
+const cls={h:"c-amber",c:"c-coral",p:"c-gray"};
+function bead(par,x,y,[n,k]){const g=document.createElementNS(NS,"g");g.setAttribute("class",cls[k]);
+g.innerHTML=`<circle cx="${x}" cy="${y}" r="15" stroke-width="0.5"/><text class="ts" x="${x}" y="${y}" text-anchor="middle" dominant-baseline="central" style="font-size:11px">${n}</text>`;par.appendChild(g);}
+const ch=$("chain");
+ch.innerHTML=`<text class="ts" x="44" y="22" text-anchor="middle">N-ter (NH₃⁺)</text><text class="ts" x="612" y="22" text-anchor="middle">→ suite</text>`;
+R.forEach((r,i)=>bead(ch,44+i*33.5,52,r));
+let sx=0,sy=0;R.forEach((r,i)=>{if(r[1]=="h"){const a=i*100*Math.PI/180;sx+=Math.cos(a);sy+=Math.sin(a);}});
+const off=-Math.atan2(sy,sx),wh=$("wheel");
+wh.innerHTML=`<circle cx="230" cy="211" r="60" fill="none" stroke="var(--b)" stroke-dasharray="3 4"/><text class="ts" x="230" y="203" text-anchor="middle">Hélice α</text><text class="ts" x="230" y="221" text-anchor="middle">vue de bout</text>`;
+R.forEach((r,i)=>{const a=i*100*Math.PI/180+off;bead(wh,230+92*Math.cos(a),211+92*Math.sin(a),r);});
+Stepper('signal',{
+caps:["Le précurseur (future protéine mitochondriale) porte en N-terminal une série d'acides aminés : c'est l'étiquette, le signal d'importation.",
+"Enroulée en hélice α, cette séquence est amphiphile : les résidus hydrophobes se regroupent sur une face, les résidus chargés positivement sur l'autre.",
+"La face hydrophobe se loge dans la poche hydrophobe du récepteur de la membrane externe (complexe TOM), qui passe ensuite le signal au translocateur TOM40."],
+st:[{ch:1,wh:0,fa:0,re:.3,tx:0},{ch:.3,wh:1,fa:1,re:.3,tx:0},{ch:.3,wh:1,fa:0,re:1,tx:214}],
+render(v){$("chain").setAttribute("opacity",v.ch);wh.setAttribute("opacity",v.wh);$("faces").setAttribute("opacity",v.fa);$("recep").setAttribute("opacity",v.re);wh.setAttribute("transform",`translate(${v.tx},0)`);}});
+})();
+</script>
+
+<section id="tomtim">
+<h2>L'importation par TOM et TIM</h2>
+<p class="src">Cours 8, diapositive 6</p>
+<div class="card split">
+<div class="fig">
+<svg width="100%" viewBox="0 0 680 420" role="img">
+<title>Importation par TOM et TIM</title>
+<desc>Une protéine dépliée portée par des Hsp70 passe par TOM puis TIM jusqu'à la matrice, son signal est coupé et elle se replie.</desc>
+<g class="c-gray"><rect x="0" y="140" width="680" height="22" stroke-width="0.5"/><rect x="0" y="220" width="680" height="22" stroke-width="0.5"/></g>
+<text class="ts" x="16" y="30">Cytosol</text>
+<text class="ts" x="16" y="155">Membrane externe</text>
+<text class="ts" x="16" y="195">Espace intermembranaire</text>
+<text class="ts" x="16" y="235">Membrane interne</text>
+<text class="ts" x="16" y="275">Matrice</text>
+<g class="c-teal"><rect x="322" y="132" width="12" height="38" rx="3" stroke-width="0.5"/><rect x="346" y="132" width="12" height="38" rx="3" stroke-width="0.5"/></g>
+<g class="c-teal"><rect x="322" y="212" width="12" height="38" rx="3" stroke-width="0.5"/><rect x="346" y="212" width="12" height="38" rx="3" stroke-width="0.5"/></g>
+<text class="th" x="372" y="156">TOM (TOM40)</text>
+<text class="th" x="372" y="236">TIM</text>
+<circle id="tt-rec" class="c-purple" cx="302" cy="128" r="10" stroke-width="0.5"/>
+<text class="ts" x="286" y="112" text-anchor="end">Récepteur</text>
+<path id="tt-trk" d="M40 90 L220 90 Q300 90 320 112 L340 128 L340 300 Q340 340 380 340 L650 340" fill="none" stroke="none"/>
+<g id="tt-fold" opacity="0">
+<path d="M470 330 q20 -40 45 -10 q25 30 -10 40 q-40 10 -25 -25 q15 -30 50 -10 q30 20 5 40" fill="none" stroke="var(--text)" stroke-width="5" stroke-linecap="round"/>
+<circle class="c-blue" cx="462" cy="332" r="7" stroke-width="0.5"/><circle class="c-blue" cx="540" cy="365" r="7" stroke-width="0.5"/>
+<text class="ts" x="590" y="345">Hsp60</text>
+<text class="th" x="505" y="400" text-anchor="middle">Protéine mature</text>
+</g>
+<polyline id="tt-body" fill="none" stroke="var(--text)" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+<g id="tt-sig"><polyline id="tt-sigl" fill="none" stroke="#E24B4A" stroke-width="8" stroke-linecap="round"/></g>
+<text id="tt-pep" class="ts" opacity="0">Peptidase</text>
+<g id="tt-hc"></g><g id="tt-hm"></g><g id="tt-atp"></g>
+</svg>
+<div class="lg"><span><i style="background:var(--amber-f);border-color:var(--amber-s)"></i>Hsp70 cytosolique</span><span><i style="background:var(--coral-f);border-color:var(--coral-s)"></i>Hsp70 mitochondriale</span><span><i class="ln" style="background:#E24B4A"></i>Peptide signal</span><span><i style="background:var(--purple-f);border-color:var(--purple-s)"></i>Récepteur</span></div>
+</div>
+<div class="side"><div class="cap"><div class="txt"></div>
+<p class="note">À retenir : TOM à la membrane externe, TIM à l'interne, des chaperonnes des deux côtés (avec de l'ATP), et le signal coupé à la fin. Hsp60 vient de la figure, pas du texte de la diapositive.</p></div></div>
+</div>
+</section>
+<script>
+(function(){
+const NS="http://www.w3.org/2000/svg",$=i=>document.getElementById('tt-'+i);
+const P=$("trk"),L=P.getTotalLength(),N=24,SP=12;
+function pt(l){if(l<0)return{x:40+l,y:90};return P.getPointAtLength(Math.min(l,L));}
+function firstY(y){let a=0,b=L;for(let k=0;k<30;k++){const m=(a+b)/2;pt(m).y<y?a=m:b=m;}return b;}
+const Lrec=firstY(112),Lt=firstY(132),Lims=firstY(192),Lmat=firstY(262),Lend=L-25;
+const HC=[6,12,18],HM=[5,10,15,20];
+function mk(par,c){const g=document.createElementNS(NS,"circle");g.setAttribute("r","8");g.setAttribute("class",c);g.setAttribute("stroke-width","0.5");par.appendChild(g);return g;}
+const hc=HC.map(()=>mk($("hc"),"c-amber")),hm=HM.map(()=>mk($("hm"),"c-coral"));
+const at=HC.map(()=>{const t=document.createElementNS(NS,"text");t.setAttribute("class","ts");t.textContent="ATP → ADP + Pi";$("atp").appendChild(t);return t;});
+Stepper('tomtim',{
+caps:["La protéine est traduite dans le cytosol. Les chaperonnes Hsp70 cytosoliques la gardent dépliée, le peptide signal en tête.",
+"Le récepteur, qui fait partie de TOM, reconnaît le peptide signal et le passe au translocateur TOM40.",
+"La protéine entre dans TOM. À mesure qu'elle passe, les Hsp70 cytosoliques hydrolysent l'ATP et se dissocient.",
+"Dans l'espace intermembranaire, TOM transfère le signal à TIM, qui fait passer la protéine à travers la membrane interne.",
+"Dans la matrice, les chaperonnes mitochondriales Hsp70 prennent la protéine en charge (ATP) : elles l'aident à finir d'entrer, puis à se replier.",
+"Une peptidase coupe le signal : il ne fait pas partie de la protéine finale.",
+"La protéine se replie (avec Hsp60) : elle est mature dans la matrice."],
+st:[{h:180,c:0,f:0,r:0},{h:Lrec,c:0,f:0,r:1},{h:Lims,c:0,f:0,r:0},{h:Lmat,c:0,f:0,r:0},{h:Lend,c:0,f:0,r:0},{h:Lend,c:1,f:0,r:0},{h:Lend,c:1,f:1,r:0}],
+dur:k=>k>=2&&k<=4?1900:1300,
+render(v){
+const h=v.h,pts=[];for(let i=0;i<N;i++)pts.push(pt(h-i*SP));
+$("body").setAttribute("points",pts.slice(2).map(p=>p.x+","+p.y).join(" "));$("body").setAttribute("opacity",1-v.f);
+$("sigl").setAttribute("points",pts.slice(0,3).map(p=>p.x+","+p.y).join(" "));
+$("sig").setAttribute("transform",`translate(${v.c*40},${v.c*45})`);$("sig").setAttribute("opacity",1-v.c*.9-v.f*.1);
+const pp=pts[2];$("pep").setAttribute("x",pp.x+14);$("pep").setAttribute("y",pp.y+4);$("pep").setAttribute("opacity",v.c*(1-v.f));
+$("fold").setAttribute("opacity",v.f);$("rec").setAttribute("stroke-width",.5+2*v.r);
+HC.forEach((ix,k)=>{const l=h-ix*SP,d=l-(Lt-12);let p,o=1;
+if(d<=0){p=pt(l);p={x:p.x,y:p.y-13};}else{const q=pt(Lt-12);p={x:q.x-30-d*.25,y:q.y-14-d*.7};o=Math.max(0,1-d/90);}
+hc[k].setAttribute("cx",p.x);hc[k].setAttribute("cy",p.y);hc[k].setAttribute("opacity",o);
+at[k].setAttribute("x",p.x-110);at[k].setAttribute("y",p.y+4);at[k].setAttribute("opacity",d>0&&d<90?Math.sin(d/90*Math.PI):0);});
+HM.forEach((ix,k)=>{const l=h-ix*SP,a=Math.max(0,Math.min(1,(l-Lmat-15)/25)),p=pt(l);
+hm[k].setAttribute("cx",p.x+(p.y<330?13:0));hm[k].setAttribute("cy",p.y+(p.y<330?0:13));hm[k].setAttribute("opacity",a*(1-v.f));});
+}});
+})();
+</script>
+
+<section id="coupure">
+<h2>Signal N-terminal coupé, signal interne gardé</h2>
+<p class="src">Cours 8, diapositive 9</p>
+<div class="card split">
+<div class="fig">
+<svg width="100%" viewBox="0 0 680 350" role="img">
+<title>Coupure du signal</title>
+<desc>À gauche, la peptidase coupe le signal N-terminal et la protéine se replie. À droite, le signal interne n'est pas coupé.</desc>
+<g class="c-gray"><rect x="0" y="120" width="680" height="26" stroke-width="0.5"/></g>
+<text class="ts" x="16" y="100">Espace intermembranaire</text>
+<text class="ts" x="16" y="137">Membrane interne</text>
+<text class="ts" x="16" y="172">Matrice</text>
+<line x1="340" y1="20" x2="340" y2="340" stroke="var(--b)" stroke-dasharray="4 4"/>
+<text class="th" x="175" y="40" text-anchor="middle">Signal en N-terminal</text>
+<text class="th" x="510" y="40" text-anchor="middle">Signal interne</text>
+<g id="cp-Lsig"><polyline points="60,230 90,214 122,230" fill="none" stroke="#E24B4A" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/><text class="ts" x="48" y="208">N-ter</text></g>
+<g id="cp-Lbody"><polyline points="122,230 152,246 182,230 212,214 242,230 272,246 302,230" fill="none" stroke="var(--text)" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/><text class="ts" x="290" y="212">C-ter</text></g>
+<g id="cp-Lfold" opacity="0"><path d="M180 240 q15 -35 40 -12 q22 24 -8 34 q-34 8 -22 -22 q12 -26 44 -8 q26 18 4 34" fill="none" stroke="var(--text)" stroke-width="5" stroke-linecap="round"/><text class="th" x="215" y="300" text-anchor="middle">Protéine mature</text></g>
+<text id="cp-Lcut" class="ts" x="122" y="200" text-anchor="middle" opacity="0">Coupé</text>
+<g id="cp-Lpep"><circle class="c-purple" cx="150" cy="315" r="16" stroke-width="0.5"/><text class="ts" x="175" y="319">Peptidase</text></g>
+<polyline points="400,70 430,88 458,98 482,108" fill="none" stroke="var(--text)" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+<text class="ts" x="392" y="62" text-anchor="end">N-ter</text>
+<polyline points="482,108 488,133 482,158" fill="none" stroke="#E24B4A" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/>
+<polyline points="482,158 512,176 542,166 572,186 602,176 632,190" fill="none" stroke="var(--text)" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+<text class="ts" x="622" y="212">C-ter</text>
+<g id="cp-Rpep"><circle class="c-purple" cx="560" cy="315" r="16" stroke-width="0.5"/><text class="ts" x="585" y="319">Peptidase</text></g>
+<g id="cp-Rno" opacity="0"><text class="th" x="420" y="200" text-anchor="middle" style="fill:var(--danger)">Pas de coupure</text><text class="ts" x="420" y="218" text-anchor="middle">signal au milieu</text></g>
+<rect x="20" y="326" width="14" height="6" fill="#E24B4A"/><text class="ts" x="40" y="333">Signal</text>
+</svg>
+</div>
+<div class="side"><div class="cap"><div class="txt"></div>
+<p class="note">Le schéma de la diapositive (MPP, IMP, Pcp1…) n'est pas à apprendre, c'est un résumé. Un signal interne n'est pas coupé parce qu'il est au milieu de la protéine.</p></div></div>
+</div>
+</section>
+<script>
+(function(){
+const $=i=>document.getElementById('cp-'+i);
+Stepper('coupure',{
+caps:["Deux protéines viennent d'être importées. À gauche, le signal est en N-terminal. À droite, le signal est interne, au milieu de la séquence.",
+"Après l'incorporation de la protéine à l'endroit désiré, une peptidase vient vers chaque signal.",
+"À gauche, la peptidase coupe le peptide signal N-terminal : il ne fait pas partie de la protéine finale. À droite, le signal interne n'est pas coupé.",
+"La protéine de gauche, sans son signal, se replie et devient mature. Celle de droite garde son signal interne dans sa séquence."],
+st:[{lm:0,lo:1,cl:0,sm:0,so:1,bo:1,fo:0,rm:0,ro:1,rn:0},{lm:1,lo:1,cl:0,sm:0,so:1,bo:1,fo:0,rm:1,ro:1,rn:0},{lm:1,lo:1,cl:1,sm:1,so:.35,bo:1,fo:0,rm:0,ro:1,rn:1},{lm:1,lo:0,cl:0,sm:1,so:0,bo:0,fo:1,rm:0,ro:.3,rn:1}],
+render(v){$("Lpep").setAttribute("transform",`translate(${-28*v.lm},${-70*v.lm})`);$("Lpep").setAttribute("opacity",v.lo);
+$("Lcut").setAttribute("opacity",v.cl);$("Lsig").setAttribute("transform",`translate(${-30*v.sm},${60*v.sm})`);$("Lsig").setAttribute("opacity",v.so);
+$("Lbody").setAttribute("opacity",v.bo);$("Lfold").setAttribute("opacity",v.fo);
+$("Rpep").setAttribute("transform",`translate(${-62*v.rm},${-118*v.rm})`);$("Rpep").setAttribute("opacity",v.ro);$("Rno").setAttribute("opacity",v.rn);}});
+})();
+</script>
+
+<p class="catg" id="cat-rel">Réticulum endoplasmique : les lipides et les membranes (cours 8)</p>
+
+<section id="rel">
+<h2>Synthèse des phospholipides dans le REL</h2>
+<p class="src">Cours 8, diapositive 14</p>
+<div class="card split">
+<div class="fig">
+<svg width="100%" viewBox="0 0 680 340" role="img">
+<title>Synthèse des phospholipides dans le REL</title>
+<desc>Substrats au site actif de l'acyl-transférase, libération des CoA, ajout au feuillet externe, trous dans le feuillet interne, scramblase et croissance symétrique.</desc>
+<text class="ts" x="16" y="30">Cytosol</text>
+<text class="ts" x="16" y="326">Lumière du RE</text>
+<text class="ts" x="300" y="112" text-anchor="middle">Feuillet externe (côté cytosol)</text>
+<text class="ts" x="300" y="292" text-anchor="middle">Feuillet interne (côté lumière)</text>
+<g id="rl-scr" opacity=".35"><rect class="c-teal" x="28" y="128" width="34" height="134" rx="8" stroke-width="0.5"/><text class="ts" x="45" y="112" text-anchor="middle">Scramblase</text></g>
+<rect class="c-purple" x="582" y="128" width="40" height="134" rx="8" stroke-width="0.5"/>
+<path d="M590 128 Q602 112 614 128" fill="none" stroke="#7F77DD" stroke-width="2"/>
+<text class="ts" x="628" y="124">site</text><text class="ts" x="628" y="139">actif</text>
+<text class="ts" x="602" y="282" text-anchor="middle">Acyl-transférase</text>
+<g id="rl-lip"></g>
+<g id="rl-fa1"><rect class="c-amber" x="0" y="0" width="34" height="8" rx="4" stroke-width="0.5"/><g id="rl-c1"><rect class="c-coral" x="34" y="-4" width="30" height="16" rx="4" stroke-width="0.5"/><text class="ts" x="49" y="4" text-anchor="middle" dominant-baseline="central" style="font-size:11px">CoA</text></g></g>
+<g id="rl-fa2"><rect class="c-amber" x="0" y="0" width="34" height="8" rx="4" stroke-width="0.5"/><g id="rl-c2"><rect class="c-coral" x="34" y="-4" width="30" height="16" rx="4" stroke-width="0.5"/><text class="ts" x="49" y="4" text-anchor="middle" dominant-baseline="central" style="font-size:11px">CoA</text></g></g>
+<g id="rl-g3p"><rect class="c-gray" x="0" y="-8" width="92" height="20" rx="4" stroke-width="0.5"/><text class="ts" x="46" y="2" text-anchor="middle" dominant-baseline="central" style="font-size:11px">Glycérol-3-P</text></g>
+<g id="rl-coa" opacity="0"><rect class="c-coral" x="0" y="-8" width="48" height="18" rx="4" stroke-width="0.5"/><text class="ts" x="24" y="1" text-anchor="middle" dominant-baseline="central" style="font-size:11px">2 CoA</text></g>
+<text id="rl-trous" class="th" x="300" y="315" text-anchor="middle" opacity="0" style="fill:var(--danger)">Trous</text>
+<text id="rl-sym" class="th" x="300" y="20" text-anchor="middle" opacity="0">Croissance symétrique</text>
+</svg>
+<div class="lg"><span>Feuillet externe : <b id="rl-cO" style="font-weight:500;color:var(--text)">10</b></span><span>Feuillet interne : <b id="rl-cI" style="font-weight:500;color:var(--text)">10</b></span><span><i style="background:var(--amber-f);border-color:var(--amber-s)"></i>Nouveau phospholipide</span></div>
+</div>
+<div class="side"><div class="cap"><div class="txt"></div>
+<p class="note">Le nombre de phospholipides est schématique : chaque réaction utilise deux acides gras et un glycérol phosphaté pour un seul phospholipide. Ne pas confondre avec la diapositive 15 : à la membrane plasmique, les flippases hydrolysent l'ATP pour rendre les couches asymétriques.</p></div></div>
+</div>
+</section>
+<script>
+(function(){
+const NS="http://www.w3.org/2000/svg",$=i=>document.getElementById('rl-'+i),L={};
+function mk(id,nw){const g=document.createElementNS(NS,"g");
+g.innerHTML=`<line x1="-3" y1="6" x2="-4" y2="34" stroke="var(--s)" stroke-width="2"/><line x1="3" y1="6" x2="4" y2="34" stroke="var(--s)" stroke-width="2"/><circle r="7" class="${nw?"c-amber":"c-gray"}" stroke-width="0.5"/>`;
+$("lip").appendChild(g);L[id]=g;}
+for(let i=0;i<10;i++){mk("O"+i);mk("I"+i);}for(let i=0;i<4;i++)mk("N"+i,1);
+const ids=Object.keys(L);
+const base={o:[...Array(10)].map((_,i)=>"O"+i),i:[...Array(10)].map((_,i)=>"I"+i)};
+const syn={o:["O0","O1","O2","N0","O3","O4","N1","O5","O6","N2","O7","O8","N3","O9"],i:base.i};
+const fin={o:["O0","O1","O2","N0","O3","O4","O5","O6","O7","O8","N3","O9"],i:["I0","I1","I2","I3","N1","I4","I5","I6","N2","I7","I8","I9"]};
+function place(lay,x0,x1,iw,atSite){const P={},o={};
+const row=(arr,y,r,a,b)=>arr.forEach((id,k)=>{P[id]={x:a+(arr.length>1?k*(b-a)/(arr.length-1):0),y,r};});
+row(lay.o,142,0,x0,x1);row(lay.i,248,180,iw?iw[0]:x0,iw?iw[1]:x1);
+ids.forEach(id=>{const p=P[id];if(p){o[id+"x"]=p.x;o[id+"y"]=p.y;o[id+"r"]=p.r;o[id+"o"]=1;o[id+"s"]=1;}
+else{o[id+"x"]=602;o[id+"y"]=82;o[id+"r"]=0;o[id+"o"]=(atSite&&id=="N0")?1:0;o[id+"s"]=.8;}});return o;}
+const sub=(a)=>({f1x:a[0],f1y:a[1],f1o:a[2],f2x:a[3],f2y:a[4],f2o:a[5],gx:a[6],gy:a[7],go:a[8],cx:a[9],cy:a[10],co:a[11]});
+const HID=[568,96,0,568,104,0,556,84,0];
+const ST=[
+{...place(base,100,496),...sub([380,52,1,380,80,1,470,64,1,560,40,0]),c:1,tr:0,sc:.35,sy:0},
+{...place(base,100,496),...sub([518,92,1,518,108,1,530,62,1,560,40,0]),c:1,tr:0,sc:.35,sy:0},
+{...place(base,100,496,null,true),...sub([...HID,440,36,1]),c:0,tr:0,sc:.35,sy:0},
+{...place(syn,100,500,[100,496]),...sub([...HID,380,24,0]),c:0,tr:1,sc:.35,sy:0},
+{...place(fin,100,496),...sub([...HID,380,24,0]),c:0,tr:0,sc:1,sy:0},
+{...place(fin,84,548),...sub([...HID,380,24,0]),c:0,tr:0,sc:.35,sy:1}];
+const CO=[10,10,10,14,12,12],CI=[10,10,10,10,12,12];
+const T=(id,x,y,o)=>{$(id).setAttribute("transform",`translate(${x},${y})`);$(id).setAttribute("opacity",o);};
+Stepper('rel',{
+caps:["La membrane du REL : deux feuillets avec autant de phospholipides. Dans le cytosol : deux acides gras liés à un CoA (acyl-CoA) et un glycérol phosphaté.",
+"Les substrats arrivent au site actif de l'acyl-transférase. L'enzyme est dans la membrane du REL, mais son site actif est du côté du cytoplasme.",
+"Réaction : les deux acides gras sont transférés sur le glycérol phosphaté. Les 2 CoA sont libérés dans le cytosol et un nouveau phospholipide est formé.",
+"Les nouveaux phospholipides s'ajoutent au feuillet externe seulement. Le feuillet externe en a plus que l'interne : le feuillet interne a des trous.",
+"La scramblase (un type de flippase) fait basculer une partie des nouveaux phospholipides vers le feuillet interne.",
+"Les deux couches sont égalisées : la membrane du REL grandit de façon symétrique."],
+st:ST,dur:()=>1300,
+render(v,m,s){
+ids.forEach(id=>{const g=L[id];g.setAttribute("transform",`translate(${v[id+"x"]},${v[id+"y"]}) rotate(${v[id+"r"]}) scale(${v[id+"s"]})`);g.setAttribute("opacity",v[id+"o"]);});
+T("fa1",v.f1x,v.f1y,v.f1o);T("fa2",v.f2x,v.f2y,v.f2o);T("g3p",v.gx,v.gy,v.go);T("coa",v.cx,v.cy,v.co);
+$("c1").setAttribute("opacity",v.c);$("c2").setAttribute("opacity",v.c);
+$("trous").setAttribute("opacity",v.tr);$("scr").setAttribute("opacity",v.sc);$("sym").setAttribute("opacity",v.sy);
+$("cO").textContent=CO[s];$("cI").textContent=CI[s];}});
+})();
+</script>
+
+<section id="pep">
+<h2>Les PEP : du RE aux mitochondries</h2>
+<p class="src">Cours 8, diapositive 22</p>
+<div class="card split">
+<div class="fig">
+<svg width="100%" viewBox="0 0 680 330" role="img">
+<title>Les PEP font le lien entre le RE et la mitochondrie</title>
+<desc>Le trafic vésiculaire ne rejoint pas la mitochondrie. Une protéine d'échange des phospholipides transporte un phospholipide du RE à la mitochondrie.</desc>
+<defs><marker id="pe-arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M2 1L8 5L2 9" fill="none" stroke="context-stroke" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></marker></defs>
+<g id="pe-route">
+<g class="c-gray"><rect x="120" y="20" width="56" height="28" rx="4" stroke-width="0.5"/><text class="th" x="148" y="34" text-anchor="middle" dominant-baseline="central">RE</text></g>
+<line x1="180" y1="34" x2="210" y2="34" class="arr" marker-end="url(#pe-arrow)"/>
+<g class="c-gray"><rect x="214" y="20" width="70" height="28" rx="4" stroke-width="0.5"/><text class="th" x="249" y="34" text-anchor="middle" dominant-baseline="central">Golgi</text></g>
+<line x1="288" y1="34" x2="318" y2="34" class="arr" marker-end="url(#pe-arrow)"/>
+<g class="c-gray"><rect x="322" y="20" width="96" height="28" rx="4" stroke-width="0.5"/><text class="th" x="370" y="34" text-anchor="middle" dominant-baseline="central">Vésicules</text></g>
+<line x1="422" y1="34" x2="500" y2="34" stroke="var(--danger)" stroke-width="1.5" stroke-dasharray="4 4"/>
+<text class="th" x="512" y="40" style="fill:var(--danger)">✕</text>
+<text class="ts" x="530" y="40">pas de lien direct</text>
+</g>
+<rect class="c-gray" x="40" y="90" width="160" height="200" rx="16" style="stroke-width:10px"/>
+<text class="th" x="110" y="194" text-anchor="middle">RE</text>
+<rect class="c-gray" x="480" y="90" width="170" height="200" rx="22" style="stroke-width:10px"/>
+<rect class="c-gray" x="504" y="114" width="122" height="152" rx="16" style="stroke-width:8px"/>
+<text class="th" x="565" y="194" text-anchor="middle">Mitochondrie</text>
+<text class="ts" x="340" y="318" text-anchor="middle">Cytoplasme</text>
+<g id="pe-stat"></g>
+<g id="pe-pep"><rect class="c-green" x="-26" y="-18" width="52" height="36" rx="12" stroke-width="0.5"/><text class="ts" x="0" y="34" text-anchor="middle" style="font-size:11px">PEP</text></g>
+<g id="pe-pl"><line x1="-4" y1="-3" x2="-24" y2="-4" stroke="var(--s)" stroke-width="2"/><line x1="-4" y1="3" x2="-24" y2="4" stroke="var(--s)" stroke-width="2"/><circle r="6" class="c-coral" stroke-width="0.5"/></g>
+</svg>
+<div class="lg"><span><i style="background:var(--coral-f);border-color:var(--coral-s)"></i>Phospholipide</span><span><i class="sq" style="background:var(--green-f);border-color:var(--green-s)"></i>PEP (protéine d'échange des phospholipides)</span></div>
+</div>
+<div class="side"><div class="cap"><div class="txt"></div>
+<p class="note">À retenir : les mitochondries et les chloroplastes n'ont pas de ligne directe avec le RE, le Golgi ou les vésicules. Les PEP font le lien.</p></div></div>
+</div>
+</section>
+<script>
+(function(){
+const NS="http://www.w3.org/2000/svg",$=i=>document.getElementById('pe-'+i);
+function lip(x,y,r){const g=document.createElementNS(NS,"g");g.innerHTML=$("pl").innerHTML;g.setAttribute("transform",`translate(${x},${y}) rotate(${r})`);$("stat").appendChild(g);}
+[120,150,230,260].forEach(y=>{lip(212,y,0);lip(468,y,180);});
+const RS=[212,190],MS=[468,190],lp=(a,b,u)=>a+(b-a)*u;
+Stepper('pep',{
+caps:["Le trafic vésiculaire (RE → Golgi → vésicules) ne communique pas directement avec les mitochondries et les chloroplastes : aucune vésicule ne leur livre de lipides.",
+"Une protéine d'échange des phospholipides (PEP), vide, se place contre la membrane du RE, côté cytoplasme.",
+"La PEP prend un phospholipide dans la membrane du RE, là où les lipides sont fabriqués.",
+"Elle traverse le cytoplasme en gardant le phospholipide dans sa poche.",
+"Elle dépose le phospholipide dans la membrane de la mitochondrie : un trou de plus dans le RE, un phospholipide de plus dans la mitochondrie.",
+"La PEP, de nouveau vide, repart chercher un autre phospholipide. Même principe pour les chloroplastes."],
+st:[{px:340,py:250,l:0,d:0,v:1},{px:248,py:190,l:0,d:0,v:.35},{px:248,py:190,l:1,d:0,v:.35},{px:340,py:150,l:1,d:0,v:.35},{px:432,py:190,l:1,d:1,v:.35},{px:340,py:250,l:1,d:1,v:.35}],
+render(v){
+$("pep").setAttribute("transform",`translate(${v.px},${v.py})`);
+let x,y,r;if(v.d>0){x=lp(v.px,MS[0],v.d);y=lp(v.py,MS[1],v.d);r=lp(90,180,v.d);}
+else{x=lp(RS[0],v.px+8,v.l);y=lp(RS[1],v.py-2,v.l);r=lp(0,90,v.l);}
+$("pl").setAttribute("transform",`translate(${x},${y}) rotate(${r})`);$("route").setAttribute("opacity",v.v);}});
+})();
+</script>
+
+<p class="catg" id="cat-perox">Le peroxysome (cours 8)</p>
+
+<section id="peroxines">
+<h2>Des peroxines à la vésicule précurseur</h2>
+<p class="src">Cours 8, diapositive 16</p>
+<div class="card split">
+<div class="fig">
+<svg width="100%" viewBox="0 0 680 320" role="img">
+<title>Des peroxines à la vésicule précurseur</title>
+<desc>Ribosomes du RER, peroxines dans la membrane, migration vers le REL, bourgeonnement et détachement de la vésicule précurseur.</desc>
+<text class="ts" x="16" y="30">Cytosol</text>
+<rect x="0" y="222" width="680" height="78" fill="var(--bg-neutral)"/>
+<text class="ts" x="16" y="270">Lumière du RE</text>
+<line x1="330" y1="150" x2="330" y2="300" stroke="var(--b)" stroke-dasharray="4 4"/>
+<text class="th" x="180" y="160" text-anchor="middle">RER</text>
+<text class="th" x="610" y="160" text-anchor="middle">REL</text>
+<rect class="c-gray" x="0" y="200" width="680" height="22" stroke-width="0.5"/>
+<g id="px-ribs"></g>
+<rect id="px-neck" class="c-gray" x="0" y="0" width="0" height="0" stroke-width="0.5"/>
+<circle id="px-ves" class="c-gray" cx="500" cy="211" r="0" style="stroke-width:12px"/>
+<g id="px-pxs"></g>
+<g id="px-vlab" opacity="0"><text class="th" x="500" y="40" text-anchor="middle">Vésicule précurseur</text><text class="ts" x="500" y="56" text-anchor="middle">phospholipides + peroxines</text></g>
+</svg>
+<div class="lg"><span><i class="sq" style="background:var(--teal-f);border-color:var(--teal-s)"></i>Peroxine</span><span><i style="background:var(--blue-f);border-color:var(--blue-s)"></i>Ribosome</span></div>
+</div>
+<div class="side"><div class="cap"><div class="txt"></div>
+<p class="note">Seules les peroxines sont produites par le RER et passent au REL. La vésicule précurseur n'est pas encore le peroxysome : il manque les autres protéines (animation suivante).</p></div></div>
+</div>
+</section>
+<script>
+(function(){
+const NS="http://www.w3.org/2000/svg",$=i=>document.getElementById('px-'+i),lp=(a,b,u)=>a+(b-a)*u;
+[90,150,210,270].forEach(x=>{const c=document.createElementNS(NS,"circle");c.setAttribute("cx",x);c.setAttribute("cy",186);c.setAttribute("r",9);c.setAttribute("class","c-blue");c.setAttribute("stroke-width","0.5");$("ribs").appendChild(c);});
+const PXR=[110,170,230],PXL=[470,500,530],ANG=[-150,-90,-30];
+const px=PXR.map(()=>{const r=document.createElementNS(NS,"rect");r.setAttribute("width",10);r.setAttribute("height",18);r.setAttribute("rx",3);r.setAttribute("class","c-teal");r.setAttribute("stroke-width","0.5");$("pxs").appendChild(r);return r;});
+Stepper('peroxines',{
+caps:["Le réticulum endoplasmique : le RER porte des ribosomes, le REL n'en a pas.",
+"Les ribosomes du RER produisent des protéines membranaires, les peroxines, qui restent insérées dans la membrane.",
+"Les peroxines migrent dans la membrane, du RER vers le REL.",
+"Le REL bourgeonne : sa membrane se courbe et forme une vésicule autour des peroxines.",
+"La vésicule se détache : c'est la vésicule précurseur du peroxysome, faite de phospholipides du REL et de peroxines. Le peroxysome n'est pas encore fini."],
+st:[{a:0,m:0,b:0,d:0},{a:1,m:0,b:0,d:0},{a:1,m:1,b:0,d:0},{a:1,m:1,b:1,d:0},{a:1,m:1,b:1,d:1}],
+render(v){
+const r=32*v.b,cy=211-58*v.b-70*v.d,cx=500+60*v.d;
+$("ves").setAttribute("cx",cx);$("ves").setAttribute("cy",cy);$("ves").setAttribute("r",Math.max(0,r));
+const nw=v.b>0?18*Math.max(0,1-2*v.d):0;
+$("neck").setAttribute("x",cx-nw/2);$("neck").setAttribute("y",cy+r);$("neck").setAttribute("width",nw);$("neck").setAttribute("height",Math.max(0,200-(cy+r)+2));
+px.forEach((p,i)=>{const a=ANG[i]*Math.PI/180,bx=cx+r*Math.cos(a),by=cy+r*Math.sin(a);
+const x=lp(lp(PXR[i],PXL[i],v.m),bx,v.b),y=lp(211,by,v.b);
+p.setAttribute("x",x-5);p.setAttribute("y",y-9);p.setAttribute("opacity",v.a);});
+$("vlab").setAttribute("opacity",v.d);}});
+})();
+</script>
+
+<section id="skl">
+<h2>Importation post-traductionnelle (signal SKL)</h2>
+<p class="src">Cours 8, diapositives 16 et 18</p>
+<div class="card split">
+<div class="fig">
+<svg width="100%" viewBox="0 0 680 320" role="img">
+<title>Importation post-traductionnelle dans le peroxysome</title>
+<desc>Ribosome libre, chaîne qui s'allonge, signal SKL en C-terminal, reconnaissance par une peroxine, entrée dans le peroxysome.</desc>
+<text class="ts" x="16" y="30">Cytosol</text>
+<path d="M50 172 q15 -6 30 0 t30 0 t30 0 t30 0 t30 0 t30 0 t30 0" fill="none" stroke="var(--s)" stroke-width="1.5"/>
+<text class="ts" x="270" y="176">ARNm</text>
+<g id="sk-rib"><circle class="c-blue" cx="150" cy="154" r="18" stroke-width="0.5"/><circle class="c-blue" cx="150" cy="128" r="12" stroke-width="0.5"/><text class="ts" x="150" y="205" text-anchor="middle">Ribosome libre</text></g>
+<circle class="c-gray" cx="530" cy="190" r="72" style="stroke-width:12px"/>
+<text class="ts" x="530" y="290" text-anchor="middle">Peroxysome</text>
+<g id="sk-pex"></g>
+<line class="leader" x1="582" y1="134" x2="610" y2="98"/><text class="ts" x="612" y="94">Peroxines</text>
+<g id="sk-enz" opacity="0"><circle class="c-amber" cx="505" cy="215" r="9" stroke-width="0.5"/><circle class="c-amber" cx="560" cy="175" r="9" stroke-width="0.5"/><circle class="c-amber" cx="555" cy="225" r="9" stroke-width="0.5"/><circle class="c-amber" cx="500" cy="175" r="9" stroke-width="0.5"/></g>
+<g id="sk-prot">
+<path id="sk-chain" d="M150 116 q20 -32 50 -20 q30 12 50 -14 q22 -22 52 -4" fill="none" stroke="var(--text)" stroke-width="5" stroke-linecap="round" pathLength="100"/>
+<g id="sk-skl" opacity="0"><rect class="c-coral" x="300" y="66" width="40" height="20" rx="4" stroke-width="0.5"/><text class="ts" x="320" y="76" text-anchor="middle" dominant-baseline="central" style="font-size:11px">SKL</text></g>
+<text id="sk-nter" class="ts" x="112" y="104" opacity="0">N-ter</text>
+<text id="sk-cter" class="ts" x="300" y="56" opacity="0">C-ter</text>
+</g>
+<text id="sk-tag" class="th" x="340" y="250" text-anchor="middle" opacity="0">Reconnaissance du signal SKL</text>
+</svg>
+</div>
+<div class="side"><div class="cap"><div class="txt"></div>
+<p class="note">Post-traductionnel parce que le signal SKL est en C-terminal : il est traduit en dernier. Au RER, c'est l'inverse (PSIT en N-terminal, entrée co-traductionnelle). La peroxine qui amène la protéine est Pex5 (diapositive 18).</p></div></div>
+</div>
+</section>
+<script>
+(function(){
+const NS="http://www.w3.org/2000/svg",$=i=>document.getElementById('sk-'+i),lp=(a,b,u)=>a+(b-a)*u;
+const PA=[200,240,300,0,60,120];const pr=PA.map(a=>{const r=document.createElementNS(NS,"rect"),t=a*Math.PI/180;
+r.setAttribute("x",530+72*Math.cos(t)-6);r.setAttribute("y",190+72*Math.sin(t)-6);r.setAttribute("width",12);r.setAttribute("height",12);r.setAttribute("rx",3);r.setAttribute("class","c-teal");r.setAttribute("stroke-width","0.5");$("pex").appendChild(r);return r;});
+const DX=[422-340,190+72*Math.sin(200*Math.PI/180)-76];
+Stepper('skl',{
+caps:["Les autres protéines du peroxysome sont fabriquées dans le cytoplasme, par des ribosomes libres (pas sur le RER). Le peroxysome porte déjà ses peroxines.",
+"La traduction commence par l'extrémité N-terminale. Le signal se trouve à l'autre bout, en C-terminal : il sera traduit en dernier.",
+"La traduction est finie : la protéine complète, avec son signal SKL en C-terminal, est libérée dans le cytosol.",
+"Les peroxines du peroxysome reconnaissent le signal SKL : c'est une importation post-traductionnelle, après la fin de la traduction.",
+"Les peroxines font entrer la protéine dans le peroxysome.",
+"Les protéines importées s'accumulent : le peroxysome se remplit de ses protéines."],
+st:[{g:0,k:0,r:0,i:0,e:0,rb:1},{g:.8,k:0,r:0,i:0,e:0,rb:1},{g:1,k:1,r:.12,i:0,e:0,rb:.35},{g:1,k:1,r:1,i:0,e:0,rb:.35},{g:1,k:1,r:1,i:1,e:0,rb:.35},{g:1,k:1,r:1,i:1,e:1,rb:.35}],
+render(v){
+$("chain").setAttribute("stroke-dasharray",`${v.g*100} 100`);
+$("skl").setAttribute("opacity",v.k);$("cter").setAttribute("opacity",v.k*(1-v.i));$("nter").setAttribute("opacity",Math.min(1,v.g*3)*(1-v.r));
+let tx=lp(0,DX[0],v.r),ty=lp(0,DX[1],v.r)-10*Math.min(1,v.r*8)*(1-v.r);
+const sc=lp(1,.45,v.i);tx=lp(tx,530-225,v.i);ty=lp(ty,195-90,v.i);
+$("prot").setAttribute("transform",`translate(${tx},${ty}) translate(225,90) scale(${sc}) translate(-225,-90)`);
+$("rib").setAttribute("opacity",v.rb);$("enz").setAttribute("opacity",v.e);
+const near=Math.max(0,Math.min(1,(v.r-.5)*2))*(1-v.i);
+pr[0].setAttribute("stroke-width",.5+2.5*near);$("tag").setAttribute("opacity",near);}});
+})();
+</script>
+
+<section id="formation">
+<h2>Les deux façons de former un peroxysome</h2>
+<p class="src">Cours 8, diapositives 17 et 18</p>
+<div class="card split">
+<div class="fig">
+<div class="modes"><button class="md">Synthèse de novo (lente)</button><button class="md">Croissance et fission (rapide)</button></div>
+<svg width="100%" viewBox="0 0 680 300" role="img">
+<title>Formation d'un peroxysome</title>
+<desc>Vésicules du réticulum endoplasmique, fusion, importation de protéines, allongement, constriction et coupure.</desc>
+<rect class="c-gray" x="40" y="36" width="600" height="22" stroke-width="0.5"/>
+<text class="th" x="16" y="52">RE</text>
+<text class="ts" x="16" y="96">Cytosol</text>
+<g id="fm-strk"></g><g id="fm-fill"></g><g id="fm-cont"></g><g id="fm-mk"></g><g id="fm-drp"></g><g id="fm-labs"></g>
+</svg>
+<div class="lg"><span><i class="sq" style="background:var(--coral-f);border-color:var(--coral-s)"></i>Pex3</span><span><i class="sq" style="background:var(--pink-f);border-color:var(--pink-s)"></i>PMP</span><span><i style="background:var(--amber-f);border-color:var(--amber-s)"></i>Protéine importée</span><span><i class="sq" style="background:var(--purple-f);border-color:var(--purple-s)"></i>DRP</span></div>
+</div>
+<div class="side"><div class="cap"><div class="txt"></div>
+<p class="note">La prof : « retenez juste Pex3 et Pex19 », et Pex5 soluble ou membranaire. Sur le schéma de la diapositive 18, les étapes 1 et 2 sont la synthèse de novo, la 3 la croissance, la 4 le peroxysome mature.</p></div></div>
+</div>
+</section>
+<script>
+(function(){
+const NS="http://www.w3.org/2000/svg",$=i=>document.getElementById('fm-'+i),lp=(a,b,u)=>a+(b-a)*u;
+function el(par,tag,at){const e=document.createElementNS(NS,tag);for(const k in at)e.setAttribute(k,at[k]);par.appendChild(e);return e;}
+const C={};["A","B","C"].forEach(k=>{C[k]={s:el($("strk"),"circle",{class:"c-gray",style:"stroke-width:10px"}),f:el($("fill"),"circle",{class:"c-gray",style:"stroke:none"})};});
+const drp=[0,1].map(()=>el($("drp"),"rect",{class:"c-purple",width:12,height:12,rx:3,"stroke-width":"0.5"}));
+const Z={cx:0,cy:0,cr:0};
+const M=[{
+caps:["Synthèse de novo : tout part du RE. Les PMP (protéines membranaires du peroxysome, des complexes de translocation) sont fabriquées par le RER, et Pex3 sert d'étiquette.",
+"Deux vésicules différentes bourgeonnent du RE : V1 et V2. Pex3 marque les vésicules destinées au peroxysome et, avec Pex19, permet l'incorporation des protéines membranaires.",
+"Fusion hétérotypique : V1 et V2 fusionnent, grâce à Pex1 à Pex6. Ça construit des complexes de translocation fonctionnels.",
+"Importation post-traductionnelle : les protéines faites dans le cytosol (signal SKL) entrent, amenées par le transporteur soluble Pex5.",
+"Le peroxysome est mature. Cette voie, entièrement nouvelle, est lente."],
+st:[{ax:200,ay:47,ar:0,bx:440,by:47,br:0,...Z,imp:0,d:0},{ax:200,ay:130,ar:28,bx:440,by:130,br:28,...Z,imp:0,d:0},{ax:320,ay:185,ar:42,bx:320,by:185,br:42,...Z,imp:0,d:0},{ax:320,ay:185,ar:52,bx:320,by:185,br:52,...Z,imp:1,d:0},{ax:320,ay:185,ar:58,bx:320,by:185,br:58,...Z,imp:1,d:0}],
+labs:[[],[[200,180,"V1"],[440,180,"V2"]],[[320,252,"V1 + V2 : fusion (Pex1-6)"]],[[320,262,"Importation (Pex5)"]],[[320,268,"Peroxysome mature"]]],
+mk:[["A",-60,"p3"],["A",200,"p3"],["A",30,"pm"],["B",-40,"pm"],["B",150,"pm"],["B",250,"p3"]],
+pre:[],imp:[["A",-14,-12],["A",14,10],["B",-2,22],["B",20,-16]]},
+{caps:["Croissance et fission : on part d'un peroxysome qui existe déjà.",
+"Une vésicule V3 bourgeonne du RE, avec Pex3 et des PMP.",
+"V3 fusionne avec le peroxysome : on lui ajoute de la membrane, il grandit.",
+"Il grandit aussi par importation post-traductionnelle de protéines (Pex5).",
+"Une fois le peroxysome volumineux, Pex11 permet son allongement.",
+"La DRP-interacting protein fait la constriction de la membrane.",
+"La DRP (dynamin-related protein) fait la coupure finale : on obtient deux peroxysomes. Cette voie est rapide."],
+st:[{ax:360,ay:190,ar:46,bx:360,by:190,br:46,cx:150,cy:47,cr:0,imp:0,d:0},{ax:360,ay:190,ar:46,bx:360,by:190,br:46,cx:150,cy:125,cr:22,imp:0,d:0},{ax:360,ay:190,ar:54,bx:360,by:190,br:54,cx:330,cy:180,cr:0,imp:0,d:0},{ax:360,ay:190,ar:60,bx:360,by:190,br:60,cx:330,cy:180,cr:0,imp:1,d:0},{ax:332,ay:190,ar:58,bx:388,by:190,br:58,cx:330,cy:180,cr:0,imp:1,d:0},{ax:312,ay:190,ar:54,bx:408,by:190,br:54,cx:330,cy:180,cr:0,imp:1,d:1},{ax:280,ay:190,ar:50,bx:440,by:190,br:50,cx:330,cy:180,cr:0,imp:1,d:0}],
+labs:[[[360,262,"Peroxysome existant"]],[[150,172,"V3"]],[[360,268,"Ajout de membrane"]],[[360,274,"Importation (Pex5)"]],[[360,274,"Allongement (Pex11)"]],[[360,270,"Constriction"]],[[280,262,"Peroxysome 1"],[440,262,"Peroxysome 2"]]],
+mk:[["A",230,"p3"],["A",150,"pm"],["B",-50,"pm"],["B",20,"p3"],["C",-90,"p3"],["C",180,"pm"]],
+pre:[["A",-22,4],["A",-6,-22],["B",16,14],["B",24,-6]],imp:[["A",-10,18],["A",-24,-10],["B",6,-18],["B",12,24]]}];
+let mks=[],pres=[],imps=[],lastL="";
+function center(v,c){return c=="A"?[v.ax,v.ay,v.ar]:c=="B"?[v.bx,v.by,v.br]:[v.cx,v.cy,v.cr];}
+Stepper('formation',{modes:M,
+build(m){["mk","cont","labs"].forEach(i=>$(i).innerHTML="");lastL="";const D=M[m];
+mks=D.mk.map(([c,a,t])=>{const g=el($("mk"),"g",{});if(t=="p3"){el(g,"rect",{class:"c-coral",x:-7,y:-7,width:14,height:14,rx:3,"stroke-width":"0.5"});const tx=el(g,"text",{class:"ts","text-anchor":"middle","dominant-baseline":"central",style:"font-size:11px"});tx.textContent="3";}else el(g,"rect",{class:"c-pink",x:-6,y:-6,width:12,height:12,rx:3,"stroke-width":"0.5"});return{c,a,g};});
+pres=D.pre.map(([c,x,y])=>({c,x,y,e:el($("cont"),"circle",{class:"c-amber",r:6,"stroke-width":"0.5"})}));
+imps=D.imp.map(([c,x,y],i)=>({c,x,y,ang:-30-i*40,e:el($("cont"),"circle",{class:"c-amber",r:6,"stroke-width":"0.5"})}));},
+render(v,m,s){
+["A","B","C"].forEach(k=>{const [x,y,r]=center(v,k);[C[k].s,C[k].f].forEach(e=>{e.setAttribute("cx",x);e.setAttribute("cy",y);e.setAttribute("r",Math.max(0,r));});C[k].s.style.opacity=r>0.5?1:0;});
+mks.forEach(q=>{const [x,y,r]=center(v,q.c),a=q.a*Math.PI/180;q.g.setAttribute("transform",`translate(${x+r*Math.cos(a)},${y+r*Math.sin(a)}) scale(${Math.min(1,r/20)})`);q.g.setAttribute("opacity",r>1?1:0);});
+pres.forEach(p=>{const [x,y,r]=center(v,p.c);p.e.setAttribute("cx",x+p.x*r/50);p.e.setAttribute("cy",y+p.y*r/50);});
+imps.forEach(p=>{const [x,y,r]=center(v,p.c),a=p.ang*Math.PI/180,ox=x+Math.cos(a)*(r+70),oy=y+Math.sin(a)*(r+60)+40,u=Math.max(0,Math.min(1,v.imp));
+p.e.setAttribute("cx",lp(ox,x+p.x*r/50,u));p.e.setAttribute("cy",lp(oy,y+p.y*r/50,u));p.e.setAttribute("opacity",(u>0||s>=2)?1:0);});
+const mx=(v.ax+v.bx)/2,hw=Math.sqrt(Math.max(0,v.ar*v.ar-((v.bx-v.ax)/2)**2));
+drp[0].setAttribute("x",mx-6);drp[0].setAttribute("y",v.ay-hw-6);drp[1].setAttribute("x",mx-6);drp[1].setAttribute("y",v.ay+hw-6);drp.forEach(d=>d.setAttribute("opacity",v.d));
+const key=m+"-"+s;if(key!==lastL){lastL=key;$("labs").innerHTML="";M[m].labs[s].forEach(([x,y,t])=>{const e=el($("labs"),"text",{class:"ts",x,y,"text-anchor":"middle"});e.textContent=t;});}}});
+})();
+</script>
+
+<p class="catg" id="cat-rer">RER : l'entrée des protéines (cours 8)</p>
+
+<section id="rer">
+<h2>L'entrée co-traductionnelle dans le RER</h2>
+<p class="src">Cours 8, diapositive 23</p>
+<div class="card split">
+<div class="fig">
+<svg width="100%" viewBox="0 0 680 340" role="img">
+<title>Entrée des protéines dans le RER</title>
+<desc>Structure du signal, assemblage du ribosome, fixation au translocateur, entrée co-traductionnelle, coupure au site AXA, départ du ribosome.</desc>
+<text class="ts" x="116" y="34" text-anchor="end">N</text>
+<g class="c-blue"><rect x="124" y="20" width="50" height="22" stroke-width="0.5"/><text class="ts" x="149" y="31" text-anchor="middle" dominant-baseline="central">++++</text></g>
+<g class="c-red"><rect x="174" y="20" width="210" height="22" stroke-width="0.5"/><text class="ts" x="279" y="31" text-anchor="middle" dominant-baseline="central">PSIT : 20 a.a. hydrophobes</text></g>
+<g class="c-purple"><rect x="384" y="20" width="54" height="22" stroke-width="0.5"/><text class="ts" x="411" y="31" text-anchor="middle" dominant-baseline="central">AXA</text></g>
+<g class="c-gray"><rect x="438" y="20" width="110" height="22" stroke-width="0.5"/><text class="ts" x="493" y="31" text-anchor="middle" dominant-baseline="central">chaîne mature</text></g>
+<text class="ts" x="556" y="34">C</text>
+<text class="ts" x="16" y="74">Cytosol</text>
+<rect class="c-gray" x="0" y="190" width="680" height="26" stroke-width="0.5"/>
+<text class="ts" x="16" y="207">Membrane du RER</text>
+<text class="ts" x="16" y="300">Lumière du RER</text>
+<rect id="re-tl" class="c-blue" x="0" y="184" width="12" height="38" rx="3" stroke-width="0.5"/>
+<rect id="re-tr" class="c-blue" x="0" y="184" width="12" height="38" rx="3" stroke-width="0.5"/>
+<rect id="re-pp" class="c-amber" x="392" y="192" width="14" height="22" rx="3" stroke-width="0.5"/>
+<g id="re-body"><path id="re-bp" d="M352 218 C360 252 440 240 440 274 C440 308 380 314 386 286 C392 260 462 264 470 300" fill="none" stroke="var(--text)" stroke-width="5" stroke-linecap="round" pathLength="100"/></g>
+<text id="re-mlab" class="th" x="560" y="262" text-anchor="middle" opacity="0">Chaîne mature</text>
+<g id="re-sig">
+<line x1="0" y1="2" x2="0" y2="10" stroke="#7F77DD" stroke-width="7" stroke-linecap="round"/>
+<line x1="0" y1="11" x2="0" y2="34" stroke="#E24B4A" stroke-width="7" stroke-linecap="round"/>
+<line x1="0" y1="35" x2="0" y2="41" stroke="#378ADD" stroke-width="7" stroke-linecap="round"/>
+</g>
+<text id="re-cut" class="th" x="420" y="180" opacity="0" style="fill:var(--danger)">Coupure à AXA</text>
+<path id="re-mrna" fill="none" stroke="var(--s)" stroke-width="1.5"/>
+<rect id="re-L" class="c-green" width="68" height="36" rx="14" stroke-width="0.5"/><rect id="re-S" class="c-green" width="56" height="18" rx="9" stroke-width="0.5"/>
+</svg>
+<div class="lg"><span><i class="sq" style="background:var(--green-f);border-color:var(--green-s)"></i>Ribosome</span><span><i class="sq" style="background:var(--blue-f);border-color:var(--blue-s)"></i>Translocateur</span><span><i class="sq" style="background:var(--amber-f);border-color:var(--amber-s)"></i>Peptidase du signal</span><span><i class="ln" style="background:#E24B4A"></i>PSIT</span><span><i class="ln" style="background:#7F77DD"></i>AXA</span><span><i class="ln" style="background:var(--s);height:2px"></i>ARNm</span></div>
+</div>
+<div class="side"><div class="cap"><div class="txt"></div>
+<p class="note">Sauf exception (diapositive 27) : certaines protéines membranaires gardent leur PSIT, qui leur sert d'ancrage. Le détail avec la SRP suit dans les deux animations suivantes.</p></div></div>
+</div>
+</section>
+<script>
+(function(){
+const $=i=>document.getElementById('re-'+i);
+Stepper('rer',{
+caps:["Sauf celles du peroxysome, les protéines destinées aux organites ou à une membrane passent par le RER. Leur signal : en N-terminal, un PSIT (Peptide Signal d'Initiation de Transfert) de 20 acides aminés hydrophobes, suivi d'un site de clivage AXA.",
+"Les sous-unités du ribosome s'assemblent sur l'ARNm dans le cytosol. Le N-terminal est traduit en premier : le PSIT sort du ribosome avant le reste de la protéine.",
+"Le ribosome se fixe sur le translocateur de la membrane du RER, et le PSIT s'y insère.",
+"Entrée co-traductionnelle : la chaîne glisse dans la lumière du RER au fur et à mesure qu'elle est traduite. L'énergie du transfert vient du ribosome. Pendant ce temps, le PSIT reste dans le translocateur.",
+"Quand toute la protéine est traduite, une peptidase coupe au site AXA : le signal est séparé et la chaîne mature est libérée dans la lumière du RER.",
+"Le ribosome se détache et ses sous-unités retournent dans le cytosol. Le translocateur se referme, le signal coupé reste dans la membrane puis disparaît."],
+st:[{rx:190,ry:140,sep:1,sg:0,sx:190,sy:140,g:0,pp:0,mx:0,my:0,tc:1,sf:1,ml:0},
+{rx:190,ry:140,sep:0,sg:1,sx:190,sy:140,g:0,pp:0,mx:0,my:0,tc:1,sf:1,ml:0},
+{rx:350,ry:182,sep:0,sg:1,sx:350,sy:182,g:0,pp:0,mx:0,my:0,tc:0,sf:1,ml:0},
+{rx:350,ry:182,sep:0,sg:1,sx:350,sy:182,g:1,pp:0,mx:0,my:0,tc:0,sf:1,ml:0},
+{rx:350,ry:182,sep:0,sg:1,sx:350,sy:182,g:1,pp:1,mx:60,my:12,tc:0,sf:1,ml:1},
+{rx:200,ry:120,sep:1,sg:1,sx:420,sy:182,g:1,pp:0,mx:60,my:12,tc:1,sf:0,ml:1}],
+dur:()=>1300,
+render(v){
+$("L").setAttribute("x",v.rx-34-46*v.sep);$("L").setAttribute("y",v.ry-36-10*v.sep);
+$("S").setAttribute("x",v.rx-28+56*v.sep);$("S").setAttribute("y",v.ry-58-34*v.sep);
+let d=`M${v.rx-120} ${v.ry-38}`;for(let i=0;i<8;i++)d+=" q15 -6 30 0";$("mrna").setAttribute("d",d);
+const w=4*(1-v.tc);$("tl").setAttribute("x",350-w-12);$("tr").setAttribute("x",350+w);
+$("sig").setAttribute("transform",`translate(${v.sx},${v.sy}) scale(1,${Math.max(.001,v.sg)})`);$("sig").setAttribute("opacity",v.sf*(v.sg>0.02?1:0));
+$("bp").setAttribute("stroke-dasharray",`${v.g*100} 100`);$("body").setAttribute("transform",`translate(${v.mx},${v.my})`);
+$("pp").setAttribute("stroke-width",.5+2.5*v.pp);$("cut").setAttribute("opacity",v.pp);$("mlab").setAttribute("opacity",v.ml);}});
+})();
+</script>
+
+<section id="srp">
+<h2>La SRP reconnaît le PSIT et bloque le site A</h2>
+<p class="src">Cours 8, diapositive 24</p>
+<div class="card split">
+<div class="fig">
+<svg width="100%" viewBox="0 0 680 330" role="img">
+<title>La SRP reconnaît le PSIT et bloque la traduction</title>
+<desc>Ribosome avec les sites E, P et A, PSIT qui émerge, SRP qui le lie dans sa poche hydrophobe puis occupe le site A.</desc>
+<text class="ts" x="16" y="30">Cytosol</text>
+<line x1="140" y1="95" x2="540" y2="95" stroke="var(--s)" stroke-width="1.5"/>
+<text class="ts" x="548" y="99">ARNm</text>
+<rect class="c-green" x="250" y="56" width="150" height="36" rx="16" stroke-width="0.5"/>
+<rect class="c-green" x="240" y="98" width="180" height="108" rx="30" stroke-width="0.5"/>
+<text class="ts" x="226" y="156" text-anchor="end">Ribosome</text>
+<g fill="none" stroke="var(--border-stronger)" stroke-dasharray="3 3"><rect x="272" y="102" width="30" height="42" rx="6"/><rect x="312" y="102" width="30" height="42" rx="6"/><rect x="352" y="102" width="30" height="42" rx="6"/></g>
+<text class="ts" x="287" y="160" text-anchor="middle">E</text><text class="ts" x="327" y="160" text-anchor="middle">P</text><text class="th" x="367" y="160" text-anchor="middle">A</text>
+<rect class="c-purple" x="316" y="106" width="22" height="34" rx="5" stroke-width="0.5"/>
+<g id="sr-ta"><rect class="c-purple" x="-11" y="-17" width="22" height="34" rx="5" stroke-width="0.5"/></g>
+<g id="sr-tx" opacity="0"><text class="th" x="500" y="40" style="fill:var(--danger)">✕</text><text class="ts" x="518" y="40">ARNt bloqué</text></g>
+<path id="sr-ch" d="M330 206 C330 246 380 252 420 252 L474 252" fill="none" stroke="var(--text)" stroke-width="5" stroke-linecap="round"/>
+<path id="sr-rd" d="M330 206 C330 246 380 252 420 252 L474 252" fill="none" stroke="#E24B4A" stroke-width="7" stroke-linecap="round"/>
+<text id="sr-pl" class="ts" opacity="0">PSIT</text>
+<g id="sr-srp">
+<line id="sr-s1" stroke="#D85A30" stroke-width="16" stroke-linecap="round"/>
+<line id="sr-s2" stroke="#D85A30" stroke-width="16" stroke-linecap="round"/>
+<circle id="sr-pk" r="12" class="c-amber" stroke-width="0.5"/>
+<text id="sr-sl" class="th">SRP</text>
+<text id="sr-pkl" class="ts">poche hydrophobe</text>
+<text id="sr-pdl" class="ts">domaine de pause</text>
+</g>
+<g id="sr-info" opacity="0"><text class="ts" x="600" y="296" text-anchor="middle">GTPase soluble</text><text class="ts" x="600" y="312" text-anchor="middle">6 protéines + 1 ARN</text></g>
+<text id="sr-stop" class="th" x="330" y="300" text-anchor="middle" opacity="0" style="fill:var(--danger)">Traduction arrêtée</text>
+</svg>
+</div>
+<div class="side"><div class="cap"><div class="txt"></div>
+<p class="note">Pourquoi la pause : sans elle, la protéine s'allongerait dans le cytosol avant d'atteindre le RER. Elle laisse à la SRP le temps d'amener le ribosome à la membrane.</p></div></div>
+</div>
+</section>
+<script>
+(function(){
+const $=i=>document.getElementById('sr-'+i);
+const CH=$("ch"),LEN=CH.getTotalLength();
+const free={Px:560,Py:250,Hx:610,Hy:180,Ax:575,Ay:118};
+function L(id,a,b,c,d){const e=$(id);e.setAttribute("x1",a);e.setAttribute("y1",b);e.setAttribute("x2",c);e.setAttribute("y2",d);}
+function T(id,x,y){$(id).setAttribute("x",x);$(id).setAttribute("y",y);}
+Stepper('srp',{
+caps:["Une protéine est en cours de traduction sur un ribosome. Le site A est l'endroit où l'ARNt chargé d'un acide aminé s'installe pendant la traduction.",
+"Le PSIT, en N-terminal, est traduit en premier : il sort du ribosome avant le reste de la protéine.",
+"La SRP (Particule de Reconnaissance du Signal) circule dans le cytosol. C'est une GTPase soluble formée de 6 protéines et d'un ARN, avec une poche hydrophobe.",
+"Dès qu'il est traduit, le PSIT, hydrophobe, se lie à la poche hydrophobe de la SRP.",
+"La SRP liée au PSIT bloque le site A du ribosome : aucun ARNt chargé ne peut s'y installer, donc la traduction s'arrête."],
+st:[{g:.12,so:0,...free,ax:367,ay:123,at:0,inf:0,st:0,pd:1},{g:.55,so:0,...free,ax:367,ay:123,at:0,inf:0,st:0,pd:1},{g:1,so:1,...free,ax:367,ay:123,at:0,inf:1,st:0,pd:1},
+{g:1,so:1,Px:488,Py:252,Hx:545,Hy:190,Ax:545,Ay:120,ax:367,ay:123,at:0,inf:0,st:0,pd:1},{g:1,so:1,Px:488,Py:252,Hx:452,Hy:165,Ax:372,Ay:124,ax:470,ay:58,at:1,inf:0,st:1,pd:0}],
+dur:()=>1300,
+render(v){
+const G=v.g*LEN;CH.setAttribute("stroke-dasharray",`${G} ${LEN}`);
+const a=Math.max(0,G-34);$("rd").setAttribute("stroke-dasharray",`0 ${a} ${G-a} ${LEN*2}`);
+const tp=CH.getPointAtLength(G);T("pl",tp.x-30,tp.y+22);$("pl").setAttribute("opacity",v.g>.4?1:0);
+L("s1",v.Px,v.Py,v.Hx,v.Hy);L("s2",v.Hx,v.Hy,v.Ax,v.Ay);$("pk").setAttribute("cx",v.Px);$("pk").setAttribute("cy",v.Py);
+T("sl",v.Hx+16,v.Hy+4);T("pkl",v.Px+18,v.Py+26);T("pdl",v.Ax+16,v.Ay-10);
+$("pdl").setAttribute("opacity",v.pd);$("srp").setAttribute("opacity",v.so);
+$("ta").setAttribute("transform",`translate(${v.ax},${v.ay})`);$("ta").setAttribute("opacity",1-.5*v.at);$("tx").setAttribute("opacity",v.at);
+$("info").setAttribute("opacity",v.inf);$("stop").setAttribute("opacity",v.st);}});
+})();
+</script>
+
+<section id="recepteur">
+<h2>Le récepteur de la SRP et le translocateur</h2>
+<p class="src">Cours 8, diapositive 25</p>
+<div class="card split">
+<div class="fig">
+<svg width="100%" viewBox="0 0 680 350" role="img">
+<title>Récepteur de la SRP et translocateur</title>
+<desc>Ribosome en pause avec la SRP, fixation au récepteur, hydrolyse du GTP, passage du PSIT dans le translocateur, reprise de la traduction et recyclage de la SRP.</desc>
+<text class="ts" x="16" y="30">Cytosol</text>
+<rect class="c-gray" x="0" y="240" width="680" height="24" stroke-width="0.5"/>
+<text class="ts" x="16" y="256">Membrane du RER</text>
+<text class="ts" x="16" y="330">Lumière du RER</text>
+<rect id="rc-tl" class="c-blue" y="232" width="12" height="40" rx="3" stroke-width="0.5"/>
+<rect id="rc-tr" class="c-blue" y="232" width="12" height="40" rx="3" stroke-width="0.5"/>
+<g class="c-purple"><rect x="402" y="226" width="16" height="44" rx="4" stroke-width="0.5"/><rect x="392" y="214" width="36" height="14" rx="5" stroke-width="0.5"/></g>
+<path id="rc-bp" d="M346 272 C352 306 420 300 418 326 C416 346 360 346 366 330 C372 314 440 314 452 338" fill="none" stroke="var(--text)" stroke-width="5" stroke-linecap="round" pathLength="100"/>
+<path id="rc-mrna" fill="none" stroke="var(--s)" stroke-width="1.5"/>
+<rect id="rc-Lg" class="c-green" width="100" height="58" rx="22" stroke-width="0.5"/>
+<rect id="rc-Sm" class="c-green" width="84" height="24" rx="10" stroke-width="0.5"/>
+<line id="rc-sig" stroke="#E24B4A" stroke-width="7" stroke-linecap="round"/>
+<g id="rc-srp"><line id="rc-s1" stroke="#D85A30" stroke-width="16" stroke-linecap="round"/><line id="rc-s2" stroke="#D85A30" stroke-width="16" stroke-linecap="round"/><circle id="rc-pk" r="11" class="c-amber" stroke-width="0.5"/><text id="rc-sl" class="th">SRP</text></g>
+<text id="rc-gtp" class="th" x="440" y="206" opacity="0">GTP → GDP + Pi</text>
+<text id="rc-st" class="ts" text-anchor="middle"></text>
+</svg>
+<div class="lg"><span><i class="sq" style="background:var(--blue-f);border-color:var(--blue-s)"></i>Translocateur</span><span><i class="sq" style="background:var(--purple-f);border-color:var(--purple-s)"></i>Récepteur de la SRP</span><span><i class="ln" style="background:#D85A30"></i>SRP</span><span><i class="ln" style="background:#E24B4A"></i>PSIT</span><span><i class="sq" style="background:var(--green-f);border-color:var(--green-s)"></i>Ribosome</span></div>
+</div>
+<div class="side"><div class="cap"><div class="txt"></div>
+<p class="note">La chaîne à retenir : PSIT, SRP, récepteur de la SRP, translocateur. Récepteur et translocateur sont côte à côte, sinon le ribosome resterait bloqué en pause. La prof préfère que vous reteniez PSIT et SRP plutôt que Sec61 (diapositive 26).</p></div></div>
+</div>
+</section>
+<script>
+(function(){
+const $=i=>document.getElementById('rc-'+i);
+function L(id,a,b,c,d){const e=$(id);e.setAttribute("x1",a);e.setAttribute("y1",b);e.setAttribute("x2",c);e.setAttribute("y2",d);}
+const stl=["Traduction en pause","Traduction en pause","Traduction en pause","Traduction reprend","Traduction continue"];
+Stepper('recepteur',{
+caps:["La SRP tient le PSIT dans sa poche hydrophobe et bloque le site A du ribosome : la traduction est en pause.",
+"La SRP liée au PSIT est reconnue par son récepteur, situé à la membrane du RER. Le ribosome se retrouve contre la membrane.",
+"Une fois liée à son récepteur, la SRP hydrolyse son GTP. Ça provoque le relâchement du signal (PSIT) et libère le site A.",
+"Le translocateur, situé à proximité du récepteur, permet au PSIT d'entrer. Libéré de la SRP, le ribosome reprend la traduction et la protéine entre dans le RER.",
+"La SRP et son récepteur se séparent : la SRP retourne dans le cytosol pour être réutilisée. La protéine continue d'entrer au fur et à mesure de sa traduction."],
+st:[{rx:190,ry:140,Px:196,Py:170,Hx:262,Hy:128,Ax:214,Ay:96,gt:0,w:0,g:0},{rx:340,ry:200,Px:346,Py:230,Hx:410,Hy:208,Ax:362,Ay:156,gt:0,w:0,g:0},{rx:340,ry:200,Px:372,Py:226,Hx:412,Hy:206,Ax:440,Ay:160,gt:1,w:0,g:0},{rx:340,ry:236,Px:380,Py:222,Hx:414,Hy:204,Ax:450,Ay:160,gt:0,w:4,g:.6},{rx:340,ry:236,Px:560,Py:150,Hx:610,Hy:100,Ax:565,Ay:60,gt:0,w:4,g:1}],
+dur:()=>1300,
+render(v,m,s){
+$("Lg").setAttribute("x",v.rx-50);$("Lg").setAttribute("y",v.ry-58);$("Sm").setAttribute("x",v.rx-42);$("Sm").setAttribute("y",v.ry-88);
+let d=`M${v.rx-120} ${v.ry-62}`;for(let i=0;i<8;i++)d+=" q15 -6 30 0";$("mrna").setAttribute("d",d);
+L("sig",v.rx,v.ry+2,v.rx,v.ry+28);
+L("s1",v.Px,v.Py,v.Hx,v.Hy);L("s2",v.Hx,v.Hy,v.Ax,v.Ay);$("pk").setAttribute("cx",v.Px);$("pk").setAttribute("cy",v.Py);
+$("sl").setAttribute("x",v.Hx+16);$("sl").setAttribute("y",v.Hy+4);
+$("tl").setAttribute("x",340-v.w-12);$("tr").setAttribute("x",340+v.w);
+$("bp").setAttribute("stroke-dasharray",`${v.g*100} 100`);$("gtp").setAttribute("opacity",v.gt);
+const st=$("st");st.setAttribute("x",v.rx);st.setAttribute("y",v.ry-98);st.textContent=stl[s];st.style.fill=s<3?"var(--danger)":"var(--text-success)";}});
+})();
+</script>
+
+
+<footer>Contenu tiré des diapositives du cours 8 de BIO 1157 et de ce qu'en dit la prof. Outil de révision personnel. Flèches ← → du clavier après un clic dans une animation.</footer>
+</main>
+<script>
+const TB=document.getElementById('theme');
+function themeLabel(){TB.textContent=document.documentElement.dataset.theme==='light'?'Mode sombre':'Mode clair'}
+TB.onclick=()=>{const n=document.documentElement.dataset.theme==='light'?'dark':'light';document.documentElement.dataset.theme=n;try{localStorage.setItem('bio1157-final-theme',n)}catch(e){}themeLabel()};
+themeLabel();
+</script>
+<script>
+/* Menu façon boutique : un onglet par catégorie, panneau déroulant au survol, recherche, tiroir sur mobile.
+   Une nouvelle section = une entrée dans MENU (son id, un titre court, une phrase). */
+(function(){
+const MENU=[
+{id:'mito',tab:'Mitochondries',titre:'Mitochondries et chloroplastes',src:'Cours 8, diapositives 3 à 11',cat:'cat-mito',k:'teal',items:[
+ {id:'signal',t:'Signal mitochondrial',d:"L'hélice α amphiphile en N-terminal et le récepteur de TOM",k:'hélice alpha amphiphile hydrophobe chargée positivement arginine lysine roue hélicoïdale récepteur TOM20 TOM22 étiquette précurseur'},
+ {id:'tomtim',t:'TOM et TIM',d:'Hsp70 des deux côtés, passage par TOM puis TIM, signal coupé',k:'TOM TIM TOM40 translocateur Hsp70 chaperonne ATP matrice espace intermembranaire peptidase Hsp60 repliement'},
+ {id:'coupure',t:'Coupure du signal',d:'Le signal N-terminal est coupé, un signal interne est gardé',k:'peptidase signal interne N-terminal maturation coupé'}]},
+{id:'rel',tab:'RE et lipides',titre:'Réticulum endoplasmique : lipides et membranes',src:'Cours 8, diapositives 12 à 15 et 22',cat:'cat-rel',k:'amber',items:[
+ {id:'rel',t:'Phospholipides du REL',d:"Acyl-transférase côté cytoplasme, puis la scramblase égalise les feuillets",k:'REL acyl-transférase acyl-CoA glycérol-3-phosphate phospholipide feuillet externe interne trous scramblase flippase croissance symétrique'},
+ {id:'pep',t:'PEP',d:'Les protéines d’échange des phospholipides, du RE aux mitochondries',k:"PEP protéine d'échange des phospholipides mitochondrie chloroplaste trafic vésiculaire Golgi"}]},
+{id:'perox',tab:'Peroxysome',titre:'Le peroxysome',src:'Cours 8, diapositives 16 à 21',cat:'cat-perox',k:'purple',items:[
+ {id:'peroxines',t:'Peroxines et vésicule précurseur',d:'Du RER au REL, puis bourgeonnement',k:'peroxines RER REL bourgeonnement vésicule précurseur ribosome'},
+ {id:'skl',t:'Importation post-traductionnelle',d:'Le signal SKL en C-terminal, reconnu par les peroxines',k:'SKL C-terminal post-traductionnel ribosome libre Pex5 peroxines importation'},
+ {id:'formation',t:'Deux façons de former un peroxysome',d:'Synthèse de novo ou croissance et fission',k:'de novo fusion hétérotypique V1 V2 V3 Pex3 Pex19 Pex1 Pex6 Pex5 Pex11 PMP DRP dynamin constriction fission lent rapide'}]},
+{id:'rer',tab:'RER',titre:"RER : l'entrée des protéines",src:'Cours 8, diapositives 23 à 26',cat:'cat-rer',k:'coral',items:[
+ {id:'rer',t:'Entrée co-traductionnelle',d:'PSIT, site AXA, translocateur et peptidase du signal',k:'PSIT peptide signal initiation transfert AXA co-traductionnel translocateur peptidase ribosome chaîne mature'},
+ {id:'srp',t:'SRP et site A',d:'La SRP lie le PSIT et met la traduction en pause',k:'SRP particule de reconnaissance du signal poche hydrophobe GTPase ARN site A ARNt pause traduction'},
+ {id:'recepteur',t:'Récepteur de la SRP',d:'GTP hydrolysé, PSIT relâché, la traduction reprend',k:'récepteur de la SRP GTP GDP translocateur Sec61 recyclage reprise traduction'}]}];
+
+const $=id=>document.getElementById('mg-'+id),RMO=matchMedia('(prefers-reduced-motion: reduce)').matches;
+const HOVER=matchMedia('(hover:hover) and (pointer:fine)'),MOB=matchMedia('(max-width:719px)');
+const nav=document.querySelector('.mega'),tabs=$('tabs'),panels=$('panels'),veil=$('veil'),drawer=$('drawer'),root=document.documentElement;
+const CHEV='<svg viewBox="0 0 24 24"><path d="M6 9l6 6l6-6"/></svg>',SEARCH='<svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/></svg>';
+const esc=t=>String(t).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const norm=t=>t.normalize('NFD').replace(/[̀-ͯ]/g,'').toLowerCase();
+
+const ITEMS=[];
+MENU.forEach(c=>c.items.forEach(it=>{it.c=c;it.sec=document.getElementById(it.id);const sr=it.sec&&it.sec.querySelector('.src');it.src=sr?sr.textContent.replace(/^[^,]*,\s*/,'').replace(/^./,m=>m.toUpperCase()):'';ITEMS.push(it)}));
+document.querySelectorAll('main section[id]').forEach(x=>{if(!ITEMS.some(it=>it.id===x.id))console.warn('Section absente du menu :',x.id)});
+
+function card(it,cat){return `<li><a class="mg-card" href="#${it.id}" data-id="${it.id}" style="--k:var(--${it.c.k}-s)">${cat?`<span class="mg-c">${esc(it.c.tab)}</span>`:''}<span class="mg-t">${esc(it.t)}</span><span class="mg-d">${esc(it.d)}</span><span class="mg-s">${esc(it.src)}</span><span class="mg-here">Vous êtes ici</span></a></li>`}
+
+/* Onglets et panneaux */
+MENU.forEach(c=>{
+ const li=document.createElement('li');
+ li.innerHTML=`<button class="mg-tab" id="mg-t-${c.id}" aria-expanded="false" aria-controls="mg-p-${c.id}">${esc(c.tab)}${CHEV}</button>`;
+ tabs.appendChild(li);
+ const n=c.items.length,p=document.createElement('div');
+ p.className='mg-panel';p.id='mg-p-'+c.id;p.hidden=true;p.setAttribute('role','region');p.setAttribute('aria-labelledby','mg-t-'+c.id);
+ p.innerHTML=`<div class="wrap mg-in"><div><p class="mg-kick">${esc(c.src)}</p><p class="mg-h">${esc(c.titre)}</p><p class="mg-n">${n} animation${n>1?'s':''}</p><a class="mg-all" href="#${c.cat}">Voir toute la catégorie</a></div><ul class="mg-grid">${c.items.map(it=>card(it)).join('')}</ul></div>`;
+ panels.appendChild(p);
+});
+const sp=document.createElement('div');
+sp.className='mg-panel';sp.id='mg-p-search';sp.hidden=true;sp.setAttribute('role','search');
+sp.innerHTML=`<div class="wrap mg-in mg-in1"><label class="mg-q">${SEARCH}<input id="mg-qi" type="search" placeholder="Rechercher une animation, une protéine, un organite…" autocomplete="off" aria-label="Rechercher une animation"></label><p class="mg-n" id="mg-qn"></p><ul class="mg-grid" id="mg-qr"></ul></div>`;
+panels.appendChild(sp);
+
+/* Tiroir (mobile) */
+drawer.innerHTML=`<div class="mg-dh"><p>Menu</p><button class="icon" id="mg-dx" aria-label="Fermer le menu"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div>
+<div class="mg-db"><label class="mg-q">${SEARCH}<input id="mg-dqi" type="search" placeholder="Rechercher…" autocomplete="off" aria-label="Rechercher une animation"></label>
+<div id="mg-dres" hidden><p class="mg-n" id="mg-dqn"></p><ul class="mg-grid" id="mg-dqr"></ul></div>
+<div id="mg-dacc">${MENU.map(c=>`<div class="mg-acc" data-cat="${c.id}"><button aria-expanded="false" style="--k:var(--${c.k}-s)"><span class="mg-dot"></span><span class="mg-at"><b>${esc(c.tab)}</b><small>${esc(c.titre)}</small></span>${CHEV}</button><ul hidden><li><a class="mg-all" href="#${c.cat}">Tout voir</a></li>${c.items.map(it=>`<li><a href="#${it.id}" data-id="${it.id}">${esc(it.t)}</a></li>`).join('')}</ul></div>`).join('')}</div></div>`;
+drawer.inert=true;
+
+/* Section active */
+let cur=-1;
+function mark(){if(cur<0)return;const it=ITEMS[cur];
+ document.querySelectorAll('.mg-card,.mg-acc a[data-id]').forEach(a=>a.classList.toggle('on',a.dataset.id===it.id));
+ tabs.querySelectorAll('.mg-tab').forEach(b=>b.classList.toggle('cur',b.id==='mg-t-'+it.c.id));
+ $('cc').textContent=it.c.tab;$('cs').textContent=it.t;}
+function upd(){let k=0;const y=innerHeight*.35;ITEMS.forEach((it,i)=>{if(it.sec&&it.sec.getBoundingClientRect().top<=y)k=i});if(k!==cur){cur=k;mark()}}
+let q=false;addEventListener('scroll',()=>{if(!q){q=true;requestAnimationFrame(()=>{q=false;upd()})}},{passive:true});
+
+/* Panneaux : survol sur ordinateur, clic ou toucher ailleurs */
+let open=null,tO=0,tC=0;
+const tabOf=k=>k==='search'?$('sb'):$('t-'+k);
+function show(k){clearTimeout(tO);clearTimeout(tC);if(open===k)return;panels.classList.toggle('sw',!!open);if(open){$('p-'+open).hidden=true;tabOf(open).setAttribute('aria-expanded','false')}
+ open=k;$('p-'+k).hidden=false;tabOf(k).setAttribute('aria-expanded','true');veil.classList.add('on');veil.classList.remove('top');}
+function close(focus){clearTimeout(tO);clearTimeout(tC);if(!open)return;const t=tabOf(open);$('p-'+open).hidden=true;t.setAttribute('aria-expanded','false');open=null;veil.classList.remove('on');if(focus)t.focus();}
+function go(id){close();closeDrawer();if(!id){scrollTo({top:0,behavior:RMO?'auto':'smooth'});history.replaceState(null,'',location.pathname+location.search);return}
+ const t=document.getElementById(id);if(!t)return;t.scrollIntoView({behavior:RMO?'auto':'smooth',block:'start'});history.replaceState(null,'','#'+id);}
+
+MENU.forEach(c=>{const b=$('t-'+c.id);
+ b.addEventListener('mouseenter',()=>{if(!HOVER.matches)return;clearTimeout(tC);clearTimeout(tO);tO=setTimeout(()=>show(c.id),open&&open!=='search'?0:140)});
+ b.addEventListener('mouseleave',()=>clearTimeout(tO));
+ b.addEventListener('click',e=>{
+  if(HOVER.matches&&e.detail>0){go(c.cat);return}          /* souris : le clic mène à la catégorie, comme sur une boutique */
+  if(open===c.id){close();return}
+  show(c.id);if(e.detail===0){const a=$('p-'+c.id).querySelector('.mg-card');a&&a.focus()}});
+});
+nav.addEventListener('mouseleave',()=>{if(!HOVER.matches||open==='search')return;clearTimeout(tO);tC=setTimeout(()=>close(),220)});
+nav.addEventListener('mouseenter',()=>clearTimeout(tC));
+veil.addEventListener('click',()=>{close();closeDrawer()});
+
+/* Recherche */
+const IDX=it=>norm([it.t,it.d,it.k||'',it.c.tab,it.c.titre,it.sec?it.sec.textContent:''].join(' '));
+function search(v,out,cnt){const w=norm(v).split(/\s+/).filter(Boolean),r=w.length?ITEMS.filter(it=>{const x=IDX(it);return w.every(m=>x.includes(m))}):ITEMS;
+ out.innerHTML=r.map(it=>card(it,true)).join('');
+ cnt.textContent=!w.length?`Toutes les animations (${ITEMS.length})`:r.length?`${r.length} résultat${r.length>1?'s':''}`:'Aucune animation ne correspond.';mark();return r}
+function openSearch(){if(MOB.matches){openDrawer(true);return}if(open==='search'){close(true);return}show('search');const i=$('qi');search(i.value,$('qr'),$('qn'));i.focus();i.select()}
+$('sb').addEventListener('click',openSearch);
+$('qi').addEventListener('input',e=>search(e.target.value,$('qr'),$('qn')));
+$('qi').addEventListener('keydown',e=>{if(e.key==='Enter'){const a=$('qr').querySelector('.mg-card');a&&go(a.dataset.id)}});
+$('dqi').addEventListener('input',e=>{const v=e.target.value.trim();$('dres').hidden=!v;$('dacc').hidden=!!v;if(v)search(v,$('dqr'),$('dqn'))});
+$('dqi').addEventListener('keydown',e=>{if(e.key==='Enter'){const a=$('dqr').querySelector('.mg-card');a&&go(a.dataset.id)}});
+
+/* Tiroir */
+function openDrawer(focusSearch){close();drawer.inert=false;drawer.classList.add('open');veil.classList.add('on','top');root.classList.add('mg-lock');$('burger').setAttribute('aria-expanded','true');
+ const c=cur>=0?ITEMS[cur].c.id:null;drawer.querySelectorAll('.mg-acc').forEach(a=>{const o=a.dataset.cat===c;a.querySelector('button').setAttribute('aria-expanded',o);a.querySelector('ul').hidden=!o});
+ setTimeout(()=>(focusSearch?$('dqi'):$('dx')).focus(),RMO?0:60);}
+function closeDrawer(focus){if(!drawer.classList.contains('open'))return;drawer.classList.remove('open');drawer.inert=true;veil.classList.remove('on','top');root.classList.remove('mg-lock');$('burger').setAttribute('aria-expanded','false');if(focus)$('burger').focus()}
+$('burger').addEventListener('click',()=>openDrawer(false));
+$('crumb').addEventListener('click',()=>openDrawer(false));
+$('dx').addEventListener('click',()=>closeDrawer(true));
+drawer.querySelectorAll('.mg-acc>button').forEach(b=>b.addEventListener('click',()=>{const o=b.getAttribute('aria-expanded')!=='true';b.setAttribute('aria-expanded',o);b.nextElementSibling.hidden=!o}));
+
+/* Liens du menu, logo, haut de page, clavier */
+document.addEventListener('click',e=>{const a=e.target.closest('.mega a[href^="#"],.mg-drawer a[href^="#"]');if(!a)return;e.preventDefault();go(a.getAttribute('href').slice(1))});
+$('brand').addEventListener('click',e=>{e.preventDefault();go(null)});
+document.getElementById('haut').addEventListener('click',()=>go(null));
+document.addEventListener('keydown',e=>{
+ if(e.key==='Escape'){if(drawer.classList.contains('open'))closeDrawer(true);else close(true);return}
+ const t=e.target;if(e.key==='/'&&!e.metaKey&&!e.ctrlKey&&!(t.closest&&t.closest('input,textarea,select,[contenteditable]'))){e.preventDefault();openSearch()}});
+MOB.addEventListener('change',()=>{close();closeDrawer()});
+addEventListener('resize',()=>{cur=-1;upd()});
+upd();
+})();
+</script>
+</body>
+</html>
