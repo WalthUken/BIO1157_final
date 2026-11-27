@@ -941,6 +941,90 @@ const st=$("st");st.setAttribute("x",v.rx);st.setAttribute("y",v.ry-98);st.textC
 </script>
 
 
+<section id="sat">
+<h2>Protéine soluble ou membranaire : la séquence d'arrêt de transfert</h2>
+<p class="src">Cours 8, diapositive 28</p>
+<div class="card split">
+<div class="fig">
+<div class="modes"><button class="md">Protéine membranaire (SAT)</button><button class="md">Protéine soluble</button></div>
+<svg width="100%" viewBox="0 0 680 380" role="img">
+<title>Protéine soluble ou membranaire</title>
+<desc>Le PSIT entre dans le translocateur et est coupé par la signal peptidase. Une protéine soluble traverse entièrement et est relâchée dans la lumière. Dans une protéine membranaire, le SAT hydrophobe ne peut pas traverser le centre hydrophile du translocateur : il est relâché dans la membrane et le reste de la chaîne reste dans le cytosol.</desc>
+<text class="ts" x="16" y="40">Cytosol</text>
+<text class="ts" x="16" y="364">Lumière du RER</text>
+<rect class="c-gray" x="0" y="205" width="680" height="40" stroke-width="0.5"/>
+<text class="ts" x="16" y="229">Membrane du RER</text>
+<rect id="sa-pep" class="c-amber" x="246" y="214" width="14" height="34" rx="5" stroke-width="0.5"/>
+<rect class="c-blue" x="272" y="196" width="30" height="58" rx="6" stroke-width="0.5"/>
+<g id="sa-rib">
+<path d="M190 104 q15 -6 30 0 q15 -6 30 0 q15 -6 30 0 q15 -6 30 0 q15 -6 30 0 q15 -6 30 0 q15 -6 30 0 q15 -6 30 0" fill="none" stroke="var(--s)" stroke-width="1.5"/>
+<rect class="c-green" x="277" y="108" width="76" height="24" rx="10" stroke-width="0.5"/>
+<rect class="c-green" x="263" y="138" width="104" height="42" rx="16" stroke-width="0.5"/>
+<text class="ts" x="250" y="164" text-anchor="end">Ribosome</text>
+</g>
+<path id="sa-b1" fill="none" stroke="var(--text)" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+<path id="sa-b2" fill="none" stroke="var(--text)" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+<path id="sa-psit" fill="none" stroke="#E24B4A" stroke-width="7" stroke-linecap="round"/>
+<path id="sa-sat" fill="none" stroke="#7F77DD" stroke-width="8" stroke-linecap="round"/>
+<rect id="sa-gate" class="c-blue" x="328" y="196" width="30" height="58" rx="6" stroke-width="0.5"/>
+<g id="sa-cut"><circle cx="306" cy="254" r="10" fill="#EF9F27" fill-opacity=".25" stroke="#BA7517" stroke-width="1"/><line x1="296" y1="254" x2="262" y2="242" stroke="#BA7517" stroke-width="1" stroke-dasharray="3 3"/></g>
+<text id="sa-cutl" class="th" x="170" y="280" style="fill:var(--danger)">PSIT coupé</text>
+<text id="sa-hyd" class="th" x="380" y="190" style="fill:var(--danger)">Centre hydrophile : bloqué</text>
+<text id="sa-ln" class="ts" text-anchor="end">NH₂</text>
+<text id="sa-lc" class="ts" text-anchor="start">COOH</text>
+</svg>
+<div class="lg"><span><i class="sq" style="background:var(--green-f);border-color:var(--green-s)"></i>Ribosome</span><span><i class="sq" style="background:var(--blue-f);border-color:var(--blue-s)"></i>Translocateur</span><span><i class="sq" style="background:var(--amber-f);border-color:var(--amber-s)"></i>Signal peptidase</span><span><i class="ln" style="background:#E24B4A"></i>PSIT</span><span><i class="ln" style="background:#7F77DD"></i>SAT</span></div>
+</div>
+<div class="side"><div class="cap"><div class="txt"></div>
+<p class="note">Les protéines membranaires à hélices α hydrophobes sont toutes synthétisées dans le RER (et sa membrane), sauf les protéines mitochondriales et chloroplastiques. Ces hélices correspondent aux régions PSIT et SAT. Le ribosome n'est pas sur la figure de la diapositive : il est ajouté pour montrer que la traduction continue.</p></div></div>
+</div>
+</section>
+<script>
+(function(){
+const $=i=>document.getElementById('sa-'+i);
+const E=[315,180],N=32,KEYS=['psit','b1','sat','b2'];
+const P0=[[315,198],[315,180]],P1=[[306,200],[306,252]];
+const B1=[[306,252],[309,266],[321,266],[324,250],[324,200],[315,180]];
+const B2=[[306,256],[300,280],[290,305],[310,325],[338,312],[340,285],[324,266],[324,200],[315,180]];
+const B3=[[270,330],[262,305],[285,290],[300,315],[330,330],[352,310],[340,282],[318,266],[315,248]];
+const S3=[[315,248],[315,204]],C3=[[315,204],[315,180]];
+const B4=[[270,330],[262,305],[285,290],[300,315],[330,330],[355,312],[372,290],[392,262],[400,247]];
+const S4=[[400,247],[400,203]],C4=[[400,203],[388,190],[350,184],[315,180]];
+const C5=[[400,203],[412,182],[432,164],[458,156],[474,134],[456,112],[430,120],[442,144],[480,154],[510,136]];
+const BS3=[[250,340],[240,310],[265,290],[285,320],[315,340],[345,320],[360,295],[340,275],[322,262],[322,200],[315,180]];
+const BS4=[[262,332],[250,306],[276,290],[300,304],[296,330],[328,342],[356,326],[348,298],[322,292],[336,272]];
+function rs(p){if(p.length<2)p=[p[0],p[0]];const L=[0];for(let i=1;i<p.length;i++)L.push(L[i-1]+Math.hypot(p[i][0]-p[i-1][0],p[i][1]-p[i-1][1]));const T=L[L.length-1],o=[];
+ for(let k=0;k<N;k++){const d=T*k/(N-1);let j=1;while(j<p.length-1&&L[j]<d)j++;const s=L[j]-L[j-1]||1,u=Math.min(1,Math.max(0,(d-L[j-1])/s));o.push([p[j-1][0]+(p[j][0]-p[j-1][0])*u,p[j-1][1]+(p[j][1]-p[j-1][1])*u]);}return o}
+/* Chaque segment devient 2N valeurs numériques que le Stepper interpole ; un segment absent est replié sur la sortie du ribosome. */
+function st(seg,o){const r={rib:o.rib??1,gate:o.gate??1,cut:o.cut||0,hyd:o.hyd||0,co:o.c?1:0},P={};
+ KEYS.forEach(k=>{const v=seg[k],p=v?rs(v.p||v):rs([E]),op=v?(v.o??1):0;P[k]=p;r[k+'o']=op;p.forEach((q,i)=>{r[k+i+'x']=q[0];r[k+i+'y']=q[1]})});
+ const n=P[o.n][0],c=o.c?P[o.c][N-1]:[510,136];r.nx=n[0];r.ny=n[1];r.cx=c[0];r.cy=c[1];return r}
+const s0=st({psit:P0},{n:'psit'}),s1=st({psit:P1,b1:B1},{n:'psit'}),s2=st({psit:P1,b1:B2},{n:'b1',cut:1});
+function d(v,k){let s='';for(let i=0;i<N;i++){const x=v[k+i+'x'].toFixed(1),y=v[k+i+'y'].toFixed(1);
+ if(!i)s='M'+x+' '+y;else if(i<N-1){const mx=((v[k+i+'x']+v[k+(i+1)+'x'])/2).toFixed(1),my=((v[k+i+'y']+v[k+(i+1)+'y'])/2).toFixed(1);s+=' Q'+x+' '+y+' '+mx+' '+my}else s+=' L'+x+' '+y}return s}
+const common=["Le ribosome est fixé au translocateur. Le PSIT, en N-terminal, sort du ribosome en premier.",
+"Le PSIT se loge dans le translocateur. La chaîne qui le suit entre en boucle dans la lumière du RER.",
+"La signal peptidase coupe le PSIT du côté de la lumière. La chaîne continue d'entrer à mesure qu'elle est traduite."];
+Stepper('sat',{modes:[
+{caps:[...common,
+"Une protéine membranaire porte un autre signal : la Séquence d'Arrêt de Transfert (SAT), une autre séquence d'acides aminés hydrophobes. Le centre du translocateur est hydrophile : le SAT ne peut pas le traverser.",
+"Le SAT ne peut ni traverser le translocateur, ni aller dans la couture de ce dernier (sa forme est non complémentaire) : il est relâché directement dans la membrane, et l'incorporation de la protéine s'arrête.",
+"La traduction continue, mais la suite de la chaîne n'entre plus dans le RER : elle reste dans le cytosol. Protéine transmembranaire : NH₂ dans la lumière, SAT dans la membrane, COOH dans le cytosol."],
+ st:[s0,s1,s2,st({psit:{p:P1,o:0},b1:B3,sat:S3,b2:C3},{n:'b1',hyd:1}),st({b1:B4,sat:S4,b2:C4},{n:'b1',gate:0}),st({b1:B4,sat:S4,b2:C5},{n:'b1',c:'b2',rib:0})]},
+{caps:[...common,
+"Une protéine soluble n'a pas de SAT : rien n'arrête la chaîne, elle traverse entièrement le translocateur.",
+"La traduction se termine : la protéine soluble est relâchée dans la lumière du RER."],
+ st:[s0,s1,s2,st({psit:{p:P1,o:0},b1:BS3},{n:'b1'}),st({b1:BS4},{n:'b1',c:'b1',rib:0})]}],
+dur:()=>1300,
+render(v){
+KEYS.forEach(k=>{const e=$(k);e.setAttribute('d',d(v,k));e.setAttribute('opacity',v[k+'o']<.02?0:v[k+'o'])});
+$('rib').setAttribute('opacity',v.rib);$('gate').setAttribute('opacity',.3+.7*v.gate);$('gate').setAttribute('stroke-dasharray',v.gate<.5?'4 3':'none');
+$('cut').setAttribute('opacity',v.cut);$('cutl').setAttribute('opacity',v.cut);$('pep').setAttribute('stroke-width',.5+2*v.cut);$('hyd').setAttribute('opacity',v.hyd);
+$('ln').setAttribute('x',v.nx-10);$('ln').setAttribute('y',v.ny-6);$('lc').setAttribute('x',v.cx+10);$('lc').setAttribute('y',v.cy+4);$('lc').setAttribute('opacity',v.co);}});
+})();
+</script>
+
+
 <footer>Contenu tiré des diapositives du cours 8 de BIO 1157 et de ce qu'en dit la prof. Outil de révision personnel. Flèches ← → du clavier après un clic dans une animation.</footer>
 </main>
 <script>
@@ -965,10 +1049,11 @@ const MENU=[
  {id:'peroxines',t:'Peroxines et vésicule précurseur',d:'Du RER au REL, puis bourgeonnement',k:'peroxines RER REL bourgeonnement vésicule précurseur ribosome'},
  {id:'skl',t:'Importation post-traductionnelle',d:'Le signal SKL en C-terminal, reconnu par les peroxines',k:'SKL C-terminal post-traductionnel ribosome libre Pex5 peroxines importation'},
  {id:'formation',t:'Deux façons de former un peroxysome',d:'Synthèse de novo ou croissance et fission',k:'de novo fusion hétérotypique V1 V2 V3 Pex3 Pex19 Pex1 Pex6 Pex5 Pex11 PMP DRP dynamin constriction fission lent rapide'}]},
-{id:'rer',tab:'RER',titre:"RER : l'entrée des protéines",src:'Cours 8, diapositives 23 à 26',cat:'cat-rer',k:'coral',items:[
+{id:'rer',tab:'RER',titre:"RER : l'entrée des protéines",src:'Cours 8, diapositives 23 à 28',cat:'cat-rer',k:'coral',items:[
  {id:'rer',t:'Entrée co-traductionnelle',d:'PSIT, site AXA, translocateur et peptidase du signal',k:'PSIT peptide signal initiation transfert AXA co-traductionnel translocateur peptidase ribosome chaîne mature'},
  {id:'srp',t:'SRP et site A',d:'La SRP lie le PSIT et met la traduction en pause',k:'SRP particule de reconnaissance du signal poche hydrophobe GTPase ARN site A ARNt pause traduction'},
- {id:'recepteur',t:'Récepteur de la SRP',d:'GTP hydrolysé, PSIT relâché, la traduction reprend',k:'récepteur de la SRP GTP GDP translocateur Sec61 recyclage reprise traduction'}]}];
+ {id:'recepteur',t:'Récepteur de la SRP',d:'GTP hydrolysé, PSIT relâché, la traduction reprend',k:'récepteur de la SRP GTP GDP translocateur Sec61 recyclage reprise traduction'},
+ {id:'sat',t:'Soluble ou membranaire',d:"Le SAT ne traverse pas le translocateur et reste dans la membrane",k:"SAT séquence d'arrêt de transfert stop-transfer protéine membranaire transmembranaire soluble hélice alpha hydrophobe centre hydrophile couture signal peptidase incorporation"}]}];
 
 const $=id=>document.getElementById('mg-'+id),RMO=matchMedia('(prefers-reduced-motion: reduce)').matches;
 const HOVER=matchMedia('(hover:hover) and (pointer:fine)'),MOB=matchMedia('(max-width:719px)');

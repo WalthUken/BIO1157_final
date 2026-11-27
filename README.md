@@ -9,7 +9,7 @@ Animations pour réviser l'examen final de BIO 1157 (Biologie cellulaire, Univer
 - **Mitochondries et chloroplastes (cours 8)** : le signal d'importation mitochondrial (hélice α amphiphile), l'importation par TOM et TIM avec les Hsp70, la coupure du signal N-terminal comparée au signal interne
 - **Réticulum endoplasmique : lipides et membranes (cours 8)** : synthèse des phospholipides par l'acyl-transférase du REL et rôle de la scramblase, les PEP entre le RE et les mitochondries
 - **Le peroxysome (cours 8)** : des peroxines à la vésicule précurseur, importation post-traductionnelle (signal SKL), les deux façons de former un peroxysome (de novo, croissance et fission)
-- **RER : l'entrée des protéines (cours 8)** : entrée co-traductionnelle (PSIT, site AXA), la SRP bloque le site A, le récepteur de la SRP et le translocateur
+- **RER : l'entrée des protéines (cours 8)** : entrée co-traductionnelle (PSIT, site AXA), la SRP bloque le site A, le récepteur de la SRP et le translocateur, protéine soluble ou membranaire (la séquence d'arrêt de transfert, SAT)
 
 ## Navigation
 
